@@ -19,59 +19,104 @@
     font-family:"Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif;
     font-size:18px;
   }
-  /* 五線（5本の細い金線） */
   .staff{height:44px;margin:0 0 8px;
     background:repeating-linear-gradient(to bottom,var(--gold-soft) 0 1px,transparent 1px 10px);
     background-size:100% 41px;background-repeat:no-repeat;background-position:0 2px;opacity:.9}
-  .wrap{max-width:1100px;margin:0 auto;padding:24px 28px 60px}
+  .wrap{max-width:1200px;margin:0 auto;padding:16px 24px 70px}
   h1{font-size:44px;margin:4px 0 2px;letter-spacing:.08em}
   h1 small{display:block;font-size:16px;color:var(--gold);letter-spacing:.3em;font-weight:normal}
   h2{font-size:28px;margin:8px 0 16px;color:var(--gold)}
   .screen{display:none}
   .screen.active{display:block}
-  .card{background:rgba(22,38,74,.78);border:1px solid var(--gold-soft);border-radius:14px;padding:20px 22px;margin:14px 0}
+  .card{background:rgba(22,38,74,.78);border:1px solid var(--gold-soft);border-radius:14px;padding:18px 20px;margin:14px 0}
   .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-  button,select,.filebtn{
+  button,select,.filebtn,input[type=text],textarea{
     font:inherit;color:var(--ink);background:var(--navy2);
-    border:1px solid var(--gold);border-radius:10px;padding:12px 20px;cursor:pointer;
+    border:1px solid var(--gold);border-radius:10px;padding:12px 18px;
   }
+  button,.filebtn{cursor:pointer}
+  input[type=text]{padding:10px 12px;border-color:var(--gold-soft)}
+  textarea{width:100%;min-height:140px;border-color:var(--gold-soft)}
   button:hover,.filebtn:hover{background:var(--navy3)}
   button.primary{background:var(--gold);color:var(--navy);font-weight:bold}
   button.primary:hover{filter:brightness(1.08)}
-  button:disabled{opacity:.4;cursor:not-allowed}
-  select{min-width:320px}
+  button.small{padding:6px 12px;font-size:15px}
+  button:disabled{opacity:.35;cursor:not-allowed}
   .filebtn input{display:none}
   .muted{color:var(--muted);font-size:15px}
   .status-ok{color:var(--ok)} .status-warn{color:var(--warn)} .status-ng{color:var(--ng)}
   .notice{border-left:4px solid var(--warn);padding:10px 14px;background:rgba(255,210,122,.08);margin:12px 0;border-radius:6px}
 
   /* 司会メニュー */
-  #menuBtn{position:fixed;top:14px;right:16px;z-index:50;padding:8px 14px;font-size:15px}
-  #menuPanel{position:fixed;top:60px;right:16px;z-index:50;display:none;flex-direction:column;gap:8px;
-    background:var(--navy2);border:1px solid var(--gold);border-radius:12px;padding:12px;width:260px}
+  #menuBtn{position:fixed;top:12px;right:14px;z-index:60;padding:8px 14px;font-size:15px}
+  #menuPanel{position:fixed;top:58px;right:14px;z-index:60;display:none;flex-direction:column;gap:8px;
+    background:var(--navy2);border:1px solid var(--gold);border-radius:12px;padding:12px;width:270px}
   #menuPanel.open{display:flex}
-  #menuPanel button{font-size:15px;padding:10px 12px;text-align:left}
-  #saveBadge{position:fixed;bottom:12px;right:16px;font-size:13px;color:var(--muted)}
+  #menuPanel button,#menuPanel .filebtn{font-size:15px;padding:10px 12px;text-align:left}
+  #saveBadge{position:fixed;bottom:10px;right:14px;font-size:13px;color:var(--muted)}
 
-  /* 再生テスト */
-  .stage{position:relative;width:480px;max-width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;border:1px solid var(--gold-soft);background:#000}
-  .stage #yt-player{position:absolute;inset:0;width:100%;height:100%}
+  /* 小窓（得点の修正・問題の移動） */
+  .modal{position:fixed;inset:0;background:rgba(5,10,22,.75);z-index:70;display:none;align-items:center;justify-content:center}
+  .modal.open{display:flex}
+  .modal .box{background:var(--navy2);border:1px solid var(--gold);border-radius:14px;padding:20px;width:min(560px,92vw);max-height:86vh;overflow:auto}
+
+  /* プレーヤーと目隠し */
+  .stage{position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;border:1px solid var(--gold-soft);background:#000}
+  .stage .yt{position:absolute;inset:0;width:100%;height:100%}
   .cover{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
-    background:radial-gradient(circle,var(--navy3),var(--navy));z-index:2;transition:opacity .4s}
-  .cover .note{font-size:90px;color:var(--gold);line-height:1}
+    background:radial-gradient(circle,var(--navy3),var(--navy));z-index:2;transition:opacity .5s}
+  .cover .note{font-size:96px;color:var(--gold);line-height:1}
+  .cover .q{font-size:26px;margin-top:8px}
   .cover.hide{opacity:0;pointer-events:none}
   .songlist{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
   .songlist button{font-size:15px;padding:8px 12px}
   .songlist button.sel{background:var(--gold);color:var(--navy)}
-  .bigctl button{font-size:20px;padding:14px 22px}
-  input[type=range]{width:220px;accent-color:var(--gold)}
+  input[type=range]{width:200px;accent-color:var(--gold)}
 
-  /* 埋め込みチェック表 */
+  /* 表 */
   table{width:100%;border-collapse:collapse;font-size:16px}
-  th,td{border-bottom:1px solid var(--gold-soft);padding:8px 6px;text-align:left}
+  th,td{border-bottom:1px solid var(--gold-soft);padding:8px 6px;text-align:left;vertical-align:middle}
   th{color:var(--gold);font-weight:normal}
+  td input[type=text]{width:100%}
 
-  /* チェック用の小さなプレーヤー（画面の外に置く） */
+  /* チーム分け */
+  .teams{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+  .team-col{border-radius:12px;padding:12px;border:2px solid var(--tc,var(--gold));background:rgba(13,24,48,.6)}
+  .team-col h3{margin:0 0 8px;color:var(--tc,var(--gold))}
+  .chip{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:6px 8px;margin:4px 0;border-radius:8px;background:var(--navy2);font-size:16px}
+  .chip select{padding:4px 6px;font-size:14px}
+  .chip .part{color:var(--muted);font-size:13px}
+
+  /* ゲーム画面 */
+  .game-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px}
+  .round{font-size:30px;color:var(--gold);letter-spacing:.08em}
+  .qno{font-size:22px}
+  .pts{display:inline-block;margin-left:10px;padding:2px 12px;border-radius:999px;border:1px solid var(--gold);font-size:18px}
+  .game-main{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(260px,1fr);gap:18px;margin-top:10px}
+  @media (max-width:820px){.game-main{grid-template-columns:1fr}}
+  .answer{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:16px 20px;
+    background:linear-gradient(to top,rgba(13,24,48,.96),rgba(13,24,48,.75) 70%,transparent);display:none}
+  .answer.show{display:block}
+  .answer .t{font-size:36px;font-weight:bold}
+  .answer .g{color:var(--gold);font-size:18px}
+  .hints{min-height:30px;margin:10px 0;font-size:20px}
+  .hints div{margin:4px 0}
+  .ctl{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+  .ctl button{font-size:18px;padding:12px 16px}
+  .score-list .team{display:flex;align-items:center;gap:10px;margin:8px 0;padding:10px 12px;border-radius:10px;
+    background:var(--navy2);border-left:6px solid var(--tc)}
+  .score-list .team .nm{flex:1;font-size:20px}
+  .score-list .team .sc{font-size:30px;font-weight:bold;min-width:52px;text-align:right}
+  .score-list .team button{padding:8px 12px;font-size:16px}
+  .key{display:inline-block;min-width:20px;padding:0 5px;border:1px solid var(--muted);border-radius:4px;font-size:12px;color:var(--muted);text-align:center;margin-left:4px}
+
+  /* 結果発表 */
+  .rank{display:flex;align-items:center;gap:16px;padding:14px 18px;margin:10px 0;border-radius:12px;background:var(--navy2);border-left:8px solid var(--tc)}
+  .rank .no{font-size:34px;color:var(--gold);width:70px}
+  .rank .nm{flex:1;font-size:26px}
+  .rank .sc{font-size:34px;font-weight:bold}
+  .rank .mem{font-size:14px;color:var(--muted)}
+
   #check-holder{position:fixed;left:-9999px;top:0;width:320px;height:180px}
 </style>
 </head>
@@ -80,13 +125,34 @@
 <button id="menuBtn">≡ 司会メニュー</button>
 <div id="menuPanel">
   <button data-act="home">はじめの画面へ</button>
+  <button data-act="score" class="game-only">得点を修正する</button>
+  <button data-act="jump" class="game-only">◯問目へ移動する</button>
   <button data-act="export">状態を書き出す（ファイル保存）</button>
-  <label class="filebtn" style="font-size:15px;padding:10px 12px">状態を読み込む
+  <label class="filebtn">状態を読み込む
     <input type="file" id="importStateInput2" accept=".json,application/json">
   </label>
   <button data-act="clear">保存データを消す</button>
 </div>
 <div id="saveBadge">未保存</div>
+
+<!-- 得点の修正 -->
+<div class="modal" id="scoreModal"><div class="box">
+  <h2 style="margin-top:0">得点を修正する</h2>
+  <div id="scoreEdit"></div>
+  <div class="row" style="margin-top:14px">
+    <button id="btnUndo">直前の加点を取り消す</button>
+    <button class="primary" data-close>閉じる</button>
+  </div>
+  <p class="muted" id="undoInfo"></p>
+</div></div>
+
+<!-- 問題の移動 -->
+<div class="modal" id="jumpModal"><div class="box">
+  <h2 style="margin-top:0">◯問目へ移動する</h2>
+  <p class="muted">得点はそのまま残ります。移動先の問題は「まだ流していない」状態から始まります。</p>
+  <div id="jumpList" class="songlist"></div>
+  <div class="row" style="margin-top:14px"><button data-close>閉じる</button></div>
+</div></div>
 
 <div class="staff"></div>
 <div class="wrap">
@@ -96,20 +162,18 @@
     <h1><small>BRASS BAND REUNION</small>イントロドン</h1>
     <p class="muted">YouTube接続：<span id="ytStatus" class="status-warn">読み込み中…</span></p>
     <div id="fileWarn" class="notice" style="display:none">
-      このページをPCのファイルとして直接開いています。この開き方だとYouTubeが再生できないことがあります（エラー153）。再生テストで確認してください。
+      このページをPCのファイルとして直接開いています。この開き方だとYouTubeが再生できないことがあります（エラー153）。
     </div>
-
     <div class="card">
       <div class="row">
         <span>曲セット：</span>
-        <select id="setSelect"></select>
+        <select id="setSelect" style="min-width:300px"></select>
         <label class="filebtn">曲セットを読み込む
           <input type="file" id="importSetInput" accept=".json,application/json">
         </label>
       </div>
       <p class="muted" id="setInfo"></p>
     </div>
-
     <div class="card">
       <div class="row">
         <button class="primary" id="btnNew">新しく始める</button>
@@ -120,13 +184,117 @@
       </div>
       <p class="muted" id="resumeInfo">保存データはありません</p>
     </div>
-
     <div class="card">
-      <p style="margin-top:0">準備用（①の動作確認）</p>
+      <p style="margin-top:0">準備用</p>
       <div class="row">
         <button id="btnTest">再生テスト</button>
         <button id="btnCheck">埋め込みチェック</button>
       </div>
+    </div>
+  </section>
+
+  <!-- ===== メンバー登録 ===== -->
+  <section class="screen" id="screen-members">
+    <h2>メンバー登録</h2>
+    <div class="card">
+      <div class="row">
+        <span>チームの数：</span>
+        <select id="teamCount"></select>
+      </div>
+      <div class="row" id="teamNames" style="margin-top:12px"></div>
+    </div>
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <span>メンバー（<span id="memberCount">0</span>人／最大17人程度）</span>
+        <div class="row">
+          <button class="small" id="btnAddMember">＋ 1人追加</button>
+          <button class="small" id="btnBulkToggle">まとめて入力</button>
+        </div>
+      </div>
+      <div id="bulkBox" style="display:none;margin-top:12px">
+        <p class="muted">1行に1人、「名前　パート」の形で入力します（区切りはスペース・カンマ・タブのどれでも可）。今の一覧の後ろに追加されます。</p>
+        <textarea id="bulkText" placeholder="山田花子　フルート&#10;佐藤太郎, トランペット"></textarea>
+        <div class="row" style="margin-top:8px"><button class="small primary" id="btnBulkAdd">一覧に追加</button></div>
+      </div>
+      <table style="margin-top:12px">
+        <thead><tr><th style="width:44%">名前</th><th style="width:40%">パート</th><th></th></tr></thead>
+        <tbody id="memberBody"></tbody>
+      </table>
+      <datalist id="partList">
+        <option value="フルート"><option value="オーボエ"><option value="ファゴット"><option value="クラリネット">
+        <option value="バスクラリネット"><option value="サックス"><option value="アルトサックス"><option value="テナーサックス">
+        <option value="バリトンサックス"><option value="トランペット"><option value="ホルン"><option value="トロンボーン">
+        <option value="ユーフォニアム"><option value="チューバ"><option value="コントラバス"><option value="パーカッション">
+      </datalist>
+    </div>
+    <div class="row">
+      <button id="btnMembersBack">← はじめの画面へ</button>
+      <button class="primary" id="btnToTeams">チーム分けへ →</button>
+    </div>
+    <p class="status-ng" id="memberError"></p>
+  </section>
+
+  <!-- ===== チーム分け ===== -->
+  <section class="screen" id="screen-teams">
+    <h2>チーム分け</h2>
+    <div class="row">
+      <button class="primary" id="btnRandomTeams">ランダムに分ける</button>
+      <span class="muted">手で分けるときは、各メンバーの右のリストでチームを選びます。</span>
+    </div>
+    <div class="card">
+      <div class="teams" id="teamCols"></div>
+    </div>
+    <div class="row">
+      <button id="btnTeamsBack">← メンバー登録へ</button>
+      <button class="primary" id="btnStartGame">ゲームを始める →</button>
+    </div>
+    <p class="muted">メンバー紹介の演出は③で、この画面とゲームの間に入ります。</p>
+    <p class="status-ng" id="teamError"></p>
+  </section>
+
+  <!-- ===== ゲーム ===== -->
+  <section class="screen" id="screen-game">
+    <div class="game-head">
+      <div class="round" id="gRound">第1楽章</div>
+      <div class="qno"><span id="gNo">第1問</span><span class="pts" id="gPts">1点</span></div>
+    </div>
+    <div class="game-main">
+      <div>
+        <div class="stage">
+          <div class="yt" id="yt-game"></div>
+          <div class="cover" id="gCover"><div class="note">♪</div><div class="q">何の曲？</div></div>
+          <div class="answer" id="gAnswer"><div class="g" id="gAnsGrade"></div><div class="t" id="gAnsTitle"></div><div class="muted" id="gAnsWho"></div></div>
+        </div>
+        <div class="hints" id="gHints"></div>
+        <p class="status-ng" id="gError"></p>
+        <div class="ctl">
+          <button class="primary" id="gPlay">▶ 最初から<span class="key">R</span></button>
+          <button id="gPause">❚❚ 一時停止<span class="key">␣</span></button>
+          <button id="gResume">▶ 続きから<span class="key">␣</span></button>
+          <button id="gHint">ヒント<span class="key">H</span></button>
+        </div>
+        <div class="row">
+          <span class="muted">音量</span><input type="range" id="gVol" min="0" max="100"><span id="gVolVal" class="muted"></span>
+        </div>
+      </div>
+      <div>
+        <div class="score-list" id="gScores"></div>
+        <div class="ctl">
+          <button id="gNone">正解なしで答えを出す<span class="key">0</span></button>
+          <button class="primary" id="gNext" disabled>次の問題へ<span class="key">N</span></button>
+        </div>
+        <p class="muted">正解したチームの「正解」を押すと加点して答えを出します（数字キー 1〜6 でも可）。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 結果発表 ===== -->
+  <section class="screen" id="screen-result">
+    <h2>結果発表</h2>
+    <div id="resultList"></div>
+    <div class="row" style="margin-top:16px">
+      <button id="btnResultBack">← 最後の問題に戻る</button>
+      <button class="primary" id="btnResultHome">はじめの画面へ</button>
     </div>
   </section>
 
@@ -135,24 +303,23 @@
     <h2>再生テスト</h2>
     <p class="muted">本番と同じく、映像を隠して音だけ流します。曲名が見えるのはこのテスト画面だけです。</p>
     <div class="row" style="align-items:flex-start">
-      <div class="stage">
-        <div id="yt-player"></div>
-        <div class="cover" id="cover"><div class="note">♪</div><div>何の曲？</div></div>
+      <div class="stage" style="width:480px;max-width:100%">
+        <div class="yt" id="yt-test"></div>
+        <div class="cover" id="tCover"><div class="note">♪</div><div class="q">何の曲？</div></div>
       </div>
       <div style="flex:1;min-width:280px">
         <p style="margin-top:0">選んでいる曲：<b id="testTitle">-</b></p>
         <p class="muted">状態：<span id="playState">-</span></p>
-        <div class="row bigctl">
-          <button class="primary" id="btnPlay">▶ 最初から</button>
-          <button id="btnPause">❚❚ 一時停止</button>
-          <button id="btnResumePlay">▶ 続きから</button>
+        <div class="ctl">
+          <button class="primary" id="tPlay">▶ 最初から</button>
+          <button id="tPause">❚❚ 一時停止</button>
+          <button id="tResume">▶ 続きから</button>
         </div>
-        <div class="row" style="margin-top:14px">
-          <span>音量</span><input type="range" id="vol" min="0" max="100"><span id="volVal"></span>
+        <div class="row">
+          <span>音量</span><input type="range" id="tVol" min="0" max="100"><span id="tVolVal"></span>
           <button id="btnCover">映像を見せる</button>
         </div>
-        <p class="muted">キーボード：スペース＝一時停止／続きから、R＝最初から</p>
-        <p id="playError" class="status-ng"></p>
+        <p id="tError" class="status-ng"></p>
       </div>
     </div>
     <div class="card">
@@ -177,16 +344,6 @@
     <button id="btnCheckBack">← はじめの画面へ</button>
   </section>
 
-  <!-- ===== メンバー登録（②で作る） ===== -->
-  <section class="screen" id="screen-members">
-    <h2>メンバー登録</h2>
-    <div class="card">
-      <p>ここは②（中核ロジック）で作ります。</p>
-      <p class="muted">いまは「新しく始める」→ この画面 → 再読み込み → 「続きから」で、この画面に戻ってくるかを確認してください。</p>
-    </div>
-    <button id="btnMembersBack">← はじめの画面へ</button>
-  </section>
-
 </div>
 
 <div id="check-holder"><div id="check-player"></div></div>
@@ -196,38 +353,57 @@
 
 // =====================================================================
 //  曲セット（ここを書き換える／コピーして別パターンを作る）
+//  1年・2年・3年から3曲ずつ出題し、残りの曲からアンコール3問を抽選します。
+//  → 各学年3曲＋アンコール用3曲以上、合計12曲以上を入れてください。
+//
 //  grade : 1 / 2 / 3（何年生のときの曲か）
 //  title : 曲名（答えとして表示）
 //  url   : YouTubeのURL（youtu.be / watch?v= / shorts どれでも可）
-//  start : 再生を始める秒数（省略すると0秒＝冒頭から）
+//  start : 再生を始める秒数（省略すると0秒＝冒頭から。URLの t= も読みます）
 //  hint1 : ヒント1（作曲者など・省略可）
 //  hint2 : ヒント2（演奏した大会・行事など・省略可）
 // =====================================================================
+const SAMPLE_URL = 'https://www.youtube.com/watch?v=M7lc1UVf-VE'; // YouTube公式の見本動画
 const SONG_SETS = [
   {
     id: 'sample',
     name: 'サンプル（動作確認用）',
     songs: [
-      { grade: 1, title: 'サンプル曲A（YouTube公式の見本動画）', url: 'https://www.youtube.com/watch?v=M7lc1UVf-VE', start: 0, hint1: '作曲者：〇〇', hint2: '〇年の定期演奏会' },
-      { grade: 2, title: 'サンプル曲B（10秒目から再生）', url: 'https://youtu.be/M7lc1UVf-VE?t=10', hint1: '', hint2: '' },
-      { grade: 3, title: 'サンプル曲C（わざとURLを空にした例）', url: '', hint1: '', hint2: '' }
+      { grade: 1, title: '1年の曲A', url: SAMPLE_URL, start: 0,  hint1: '作曲者：〇〇', hint2: '1年の定期演奏会' },
+      { grade: 1, title: '1年の曲B', url: SAMPLE_URL, start: 5,  hint1: '作曲者：〇〇', hint2: '1年の夏のコンクール' },
+      { grade: 1, title: '1年の曲C', url: SAMPLE_URL, start: 10, hint1: '', hint2: '' },
+      { grade: 1, title: '1年の曲D', url: SAMPLE_URL, start: 15, hint1: '', hint2: '' },
+      { grade: 2, title: '2年の曲A', url: SAMPLE_URL, start: 20, hint1: '作曲者：〇〇', hint2: '' },
+      { grade: 2, title: '2年の曲B', url: SAMPLE_URL, start: 25, hint1: '', hint2: '' },
+      { grade: 2, title: '2年の曲C', url: SAMPLE_URL, start: 30, hint1: '', hint2: '' },
+      { grade: 2, title: '2年の曲D', url: SAMPLE_URL, start: 35, hint1: '', hint2: '' },
+      { grade: 3, title: '3年の曲A', url: SAMPLE_URL, start: 40, hint1: '作曲者：〇〇', hint2: '引退の定期演奏会' },
+      { grade: 3, title: '3年の曲B', url: SAMPLE_URL, start: 45, hint1: '', hint2: '' },
+      { grade: 3, title: '3年の曲C', url: SAMPLE_URL, start: 50, hint1: '', hint2: '' },
+      { grade: 3, title: '3年の曲D', url: SAMPLE_URL, start: 55, hint1: '', hint2: '' }
     ]
   }
 ];
 
+// ===== ゲームのきまり（ここで変えられる） =====
+const RULES = {
+  perGrade: 3,       // 各学年から出す問題数
+  encoreCount: 3,    // アンコール（ランダム）の問題数
+  normalPoints: 1,   // 通常問題の点数
+  encorePoints: 2,   // アンコール問題の点数
+  maxTeams: 6
+};
+const TEAM_COLORS = ['#e8b04a', '#5fb3e8', '#e8738a', '#6fd3a0', '#b48ae8', '#f08a4b'];
+const ROUND_LABELS = { 1: '第1楽章　1年の曲', 2: '第2楽章　2年の曲', 3: '第3楽章　3年の曲', encore: 'アンコールステージ' };
+
 // ===== 保存に使う名前（変えると過去の保存データは読まれなくなる） =====
 const KEY_STATE = 'introdon_state_v1';
 const KEY_SETS  = 'introdon_sets_v1';
+const SCREEN_NAMES = { start: 'はじめの画面', test: '再生テスト', check: '埋め込みチェック', members: 'メンバー登録', teams: 'チーム分け', game: 'ゲーム', result: '結果発表' };
 
-const SCREEN_NAMES = { start: 'はじめの画面', test: '再生テスト', check: '埋め込みチェック', members: 'メンバー登録' };
-
-// YouTubeのエラー番号 → 日本語の説明
 const YT_ERRORS = {
-  2:   'URLが正しくありません',
-  5:   'このブラウザで再生できません',
-  100: '動画が削除されたか非公開です',
-  101: '埋め込み禁止（アプリ内では再生できません）',
-  150: '埋め込み禁止（アプリ内では再生できません）',
+  2: 'URLが正しくありません', 5: 'このブラウザで再生できません', 100: '動画が削除されたか非公開です',
+  101: '埋め込み禁止（アプリ内では再生できません）', 150: '埋め込み禁止（アプリ内では再生できません）',
   153: '置き場所の問題で再生できません（ファイルで直接開いている可能性）'
 };
 
@@ -237,51 +413,56 @@ function newState(setId) {
     version: 1,
     setId: setId || SONG_SETS[0].id,
     screen: 'start',
-    testIndex: 0,     // 再生テストで選んでいる曲
+    testIndex: 0,
     volume: 80,
-    // ↓②で使う
-    members: [], teams: [], questions: [], current: 0, scores: {},
+    teamNames: ['Aチーム', 'Bチーム', 'Cチーム'],
+    members: [],        // { name, part, team }  team はチーム番号（0〜）か null
+    questions: [],      // { song: 曲番号, round: 1|2|3|'encore', points }
+    current: 0,         // 何問目か（0から）
+    phase: 'ready',     // ready=まだ流していない / answer=答えを出した
+    hintsShown: 0,
+    scores: [],         // チームごとの得点
+    awarded: [],        // 問題ごとに加点したチーム（null=正解なし）
+    log: [],            // 加点の記録（取り消し用）{ q, team, points }
     savedAt: null
   };
 }
 let state = newState();
 let importedSets = [];
 
-// ===== 保存まわり（ブラウザに保存。使えない環境でも止まらないようにする） =====
+// ===== 保存まわり =====
 function saveState() {
   state.savedAt = new Date().toISOString();
-  try {
-    localStorage.setItem(KEY_STATE, JSON.stringify(state));
-    setBadge('自動保存 ' + fmtTime(state.savedAt));
-  } catch (e) {
-    setBadge('ブラウザに保存できません（司会メニューの「書き出す」を使ってください）');
-  }
+  try { localStorage.setItem(KEY_STATE, JSON.stringify(state)); setBadge('自動保存 ' + fmtTime(state.savedAt)); }
+  catch (e) { setBadge('ブラウザに保存できません（司会メニューの「書き出す」を使ってください）'); }
 }
 function loadSaved() {
-  try { const s = localStorage.getItem(KEY_STATE); return s ? JSON.parse(s) : null; }
-  catch (e) { return null; }
+  try { const s = localStorage.getItem(KEY_STATE); return s ? JSON.parse(s) : null; } catch (e) { return null; }
 }
-function clearSaved() {
-  try { localStorage.removeItem(KEY_STATE); } catch (e) {}
-}
+function clearSaved() { try { localStorage.removeItem(KEY_STATE); } catch (e) {} }
 function loadImportedSets() {
-  try { const s = localStorage.getItem(KEY_SETS); importedSets = s ? JSON.parse(s) : []; }
-  catch (e) { importedSets = []; }
+  try { const s = localStorage.getItem(KEY_SETS); importedSets = s ? JSON.parse(s) : []; } catch (e) { importedSets = []; }
 }
-function saveImportedSets() {
-  try { localStorage.setItem(KEY_SETS, JSON.stringify(importedSets)); } catch (e) {}
-}
-function setBadge(t) { document.getElementById('saveBadge').textContent = t; }
+function saveImportedSets() { try { localStorage.setItem(KEY_SETS, JSON.stringify(importedSets)); } catch (e) {} }
+function setBadge(t) { $('saveBadge').textContent = t; }
 function fmtTime(iso) {
   const d = new Date(iso);
-  return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+function pad(n) { return String(n).padStart(2, '0'); }
+function $(id) { return document.getElementById(id); }
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function shuffle(a) {
+  const b = a.slice();
+  for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; }
+  return b;
 }
 
-// ===== 曲セットの取り出し =====
+// ===== 曲セット =====
 function allSets() { return SONG_SETS.concat(importedSets); }
 function currentSet() { return allSets().find(s => s.id === state.setId) || allSets()[0]; }
-
-// YouTubeのURLから動画ID（11文字）を取り出す
 function parseVideoId(url) {
   if (!url) return null;
   url = String(url).trim();
@@ -295,7 +476,6 @@ function parseVideoId(url) {
   } catch (e) {}
   return null;
 }
-// 開始秒：曲セットの start が優先。なければURLの t= を読む（例 t=90 / t=1m30s）
 function songStart(song) {
   if (typeof song.start === 'number') return song.start;
   try {
@@ -310,19 +490,25 @@ function songStart(song) {
 // ===== 画面の切り替え =====
 function show(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-' + name).classList.add('active');
+  $('screen-' + name).classList.add('active');
   state.screen = name;
+  if (name !== 'test') testP.stop();
+  if (name !== 'game') gameP.stop();
   if (name === 'start') renderStart();
+  if (name === 'members') renderMembers();
+  if (name === 'teams') renderTeams();
+  if (name === 'game') renderGame();
+  if (name === 'result') renderResult();
   if (name === 'test') renderTest();
   if (name === 'check') renderCheckTable();
-  if (name !== 'test') stopMain();
+  document.querySelectorAll('.game-only').forEach(b => b.style.display = name === 'game' ? '' : 'none');
   saveState();
   window.scrollTo(0, 0);
 }
 
 // ===== はじめの画面 =====
 function renderStart() {
-  const sel = document.getElementById('setSelect');
+  const sel = $('setSelect');
   sel.innerHTML = '';
   allSets().forEach(s => {
     const o = document.createElement('option');
@@ -332,49 +518,190 @@ function renderStart() {
   });
   const set = currentSet();
   const count = g => set.songs.filter(s => Number(s.grade) === g).length;
-  document.getElementById('setInfo').textContent =
-    '1年：' + count(1) + '曲　2年：' + count(2) + '曲　3年：' + count(3) + '曲';
+  const need = RULES.perGrade * 3 + RULES.encoreCount;
+  let info = '1年：' + count(1) + '曲　2年：' + count(2) + '曲　3年：' + count(3) + '曲';
+  const lack = [1, 2, 3].filter(g => count(g) < RULES.perGrade);
+  if (lack.length) info += '　⚠ ' + lack.join('・') + '年の曲が' + RULES.perGrade + '曲未満です';
+  else if (set.songs.length < need) info += '　⚠ アンコール用の曲が足りません（合計' + need + '曲以上必要）';
+  $('setInfo').textContent = info;
 
   const saved = loadSaved();
-  const btn = document.getElementById('btnResume');
+  const btn = $('btnResume');
   if (saved && saved.screen && saved.screen !== 'start') {
     btn.disabled = false;
-    document.getElementById('resumeInfo').textContent =
-      '前回の保存：' + fmtTime(saved.savedAt) + '（' + (SCREEN_NAMES[saved.screen] || saved.screen) + '）';
+    let where = SCREEN_NAMES[saved.screen] || saved.screen;
+    if (saved.screen === 'game') where += ' 第' + (saved.current + 1) + '問';
+    $('resumeInfo').textContent = '前回の保存：' + fmtTime(saved.savedAt) + '（' + where + '）';
   } else {
     btn.disabled = true;
-    document.getElementById('resumeInfo').textContent = '保存データはありません';
+    $('resumeInfo').textContent = '保存データはありません';
   }
-  document.getElementById('fileWarn').style.display = location.protocol === 'file:' ? 'block' : 'none';
+  $('fileWarn').style.display = location.protocol === 'file:' ? 'block' : 'none';
 }
 
-// ===== YouTube（本番用プレーヤー） =====
-let ytApiReady = false, player = null, playerReady = false, coverOn = true;
+// ===== メンバー登録 =====
+function renderMembers() {
+  const tc = $('teamCount');
+  tc.innerHTML = '';
+  for (let n = 2; n <= RULES.maxTeams; n++) {
+    const o = document.createElement('option');
+    o.value = n; o.textContent = n + 'チーム';
+    if (n === state.teamNames.length) o.selected = true;
+    tc.appendChild(o);
+  }
+  const box = $('teamNames');
+  box.innerHTML = '';
+  state.teamNames.forEach((nm, i) => {
+    const inp = document.createElement('input');
+    inp.type = 'text'; inp.value = nm; inp.style.borderLeft = '6px solid ' + TEAM_COLORS[i];
+    inp.style.width = '160px';
+    inp.oninput = () => { state.teamNames[i] = inp.value; };
+    inp.onchange = saveState;
+    box.appendChild(inp);
+  });
+  const body = $('memberBody');
+  body.innerHTML = '';
+  state.members.forEach((m, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td><input type="text" data-k="name" value="' + esc(m.name) + '" placeholder="名前"></td>' +
+      '<td><input type="text" data-k="part" list="partList" value="' + esc(m.part) + '" placeholder="パート"></td>' +
+      '<td><button class="small" data-del>削除</button></td>';
+    tr.querySelectorAll('input').forEach(inp => {
+      inp.oninput = () => { m[inp.dataset.k] = inp.value; };
+      inp.onchange = saveState;
+    });
+    tr.querySelector('[data-del]').onclick = () => { state.members.splice(i, 1); saveState(); renderMembers(); };
+    body.appendChild(tr);
+  });
+  $('memberCount').textContent = state.members.length;
+  $('memberError').textContent = '';
+}
+function setTeamCount(n) {
+  const defaults = ['Aチーム', 'Bチーム', 'Cチーム', 'Dチーム', 'Eチーム', 'Fチーム'];
+  while (state.teamNames.length < n) state.teamNames.push(defaults[state.teamNames.length]);
+  state.teamNames.length = n;
+  state.members.forEach(m => { if (m.team != null && m.team >= n) m.team = null; });
+  saveState(); renderMembers();
+}
+function addBulk() {
+  const lines = $('bulkText').value.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+  lines.forEach(line => {
+    const parts = line.split(/[\s,、，\t]+/).filter(Boolean);
+    const part = parts.length > 1 ? parts.pop() : '';
+    state.members.push({ name: parts.join(' '), part, team: null });
+  });
+  $('bulkText').value = '';
+  $('bulkBox').style.display = 'none';
+  saveState(); renderMembers();
+}
+
+// ===== チーム分け =====
+function renderTeams() {
+  const cols = $('teamCols');
+  cols.innerHTML = '';
+  const groups = state.teamNames.map(() => []);
+  const none = [];
+  state.members.forEach((m, i) => (m.team != null && groups[m.team] ? groups[m.team] : none).push(i));
+  const makeCol = (title, color, list) => {
+    const col = document.createElement('div');
+    col.className = 'team-col'; col.style.setProperty('--tc', color);
+    col.innerHTML = '<h3>' + esc(title) + '（' + list.length + '人）</h3>';
+    list.forEach(i => {
+      const m = state.members[i];
+      const chip = document.createElement('div');
+      chip.className = 'chip';
+      let opts = '<option value="">未定</option>';
+      state.teamNames.forEach((nm, t) => { opts += '<option value="' + t + '"' + (m.team === t ? ' selected' : '') + '>' + esc(nm) + '</option>'; });
+      chip.innerHTML = '<div>' + esc(m.name || '（名前なし）') + ' <span class="part">' + esc(m.part) + '</span></div><select>' + opts + '</select>';
+      chip.querySelector('select').onchange = e => {
+        m.team = e.target.value === '' ? null : Number(e.target.value);
+        saveState(); renderTeams();
+      };
+      col.appendChild(chip);
+    });
+    cols.appendChild(col);
+  };
+  state.teamNames.forEach((nm, t) => makeCol(nm, TEAM_COLORS[t], groups[t]));
+  if (none.length) makeCol('未定', '#7a849a', none);
+  $('teamError').textContent = '';
+}
+function randomTeams() {
+  const n = state.teamNames.length;
+  shuffle(state.members.map((_, i) => i)).forEach((mi, k) => { state.members[mi].team = k % n; });
+  saveState(); renderTeams();
+}
+
+// ===== 出題の準備 =====
+function buildQuestions() {
+  const songs = currentSet().songs;
+  const qs = [];
+  const used = new Set();
+  [1, 2, 3].forEach(g => {
+    const pick = shuffle(songs.map((s, i) => i).filter(i => Number(songs[i].grade) === g)).slice(0, RULES.perGrade);
+    pick.forEach(i => { used.add(i); qs.push({ song: i, round: g, points: RULES.normalPoints }); });
+  });
+  shuffle(songs.map((s, i) => i).filter(i => !used.has(i))).slice(0, RULES.encoreCount)
+    .forEach(i => qs.push({ song: i, round: 'encore', points: RULES.encorePoints }));
+  return qs;
+}
+function startGame() {
+  const err = $('teamError');
+  if (state.members.some(m => m.team == null)) { err.textContent = 'チームが「未定」の人がいます。ランダムに分けるか、手で選んでください。'; return; }
+  const qs = buildQuestions();
+  if (qs.length < RULES.perGrade * 3 + RULES.encoreCount &&
+      !confirm('曲が足りないため、全' + qs.length + '問になります。このまま始めますか？')) return;
+  if (!qs.length) { err.textContent = '出題できる曲がありません。曲セットを確認してください。'; return; }
+  state.questions = qs;
+  state.current = 0;
+  state.phase = 'ready';
+  state.hintsShown = 0;
+  state.scores = state.teamNames.map(() => 0);
+  state.awarded = qs.map(() => undefined);
+  state.log = [];
+  show('game');
+}
+
+// ===== YouTubeプレーヤー（本番用・テスト用の2つ） =====
+let ytApiReady = false;
+function makePlayer(elId, onStateText, onErrorText) {
+  const P = { yt: null, ready: false };
+  P.create = () => {
+    P.yt = new YT.Player(elId, {
+      width: '100%', height: '100%',
+      playerVars: { controls: 0, disablekb: 1, rel: 0, playsinline: 1, iv_load_policy: 3, fs: 0 },
+      events: {
+        onReady: () => { P.ready = true; P.yt.setVolume(state.volume); },
+        onStateChange: e => onStateText && onStateText(e.data),
+        onError: e => onErrorText && onErrorText('エラー ' + e.data + '：' + (YT_ERRORS[e.data] || '再生できませんでした'))
+      }
+    });
+  };
+  P.play = song => {
+    if (!P.ready) { onErrorText && onErrorText('YouTubeの準備がまだです。少し待ってください。'); return; }
+    const id = parseVideoId(song && song.url);
+    if (!id) { onErrorText && onErrorText('この曲のURLが読めません（曲セットを確認）'); return; }
+    onErrorText && onErrorText('');
+    P.yt.setVolume(state.volume);
+    P.yt.loadVideoById({ videoId: id, startSeconds: songStart(song) });
+  };
+  P.pause  = () => { if (P.ready) P.yt.pauseVideo(); };
+  P.resume = () => { if (P.ready) P.yt.playVideo(); };
+  P.stop   = () => { if (P.ready) { try { P.yt.stopVideo(); } catch (e) {} } };
+  P.vol    = v => { if (P.ready) P.yt.setVolume(v); };
+  P.state  = () => (P.ready ? P.yt.getPlayerState() : -1);
+  return P;
+}
+const STATE_TEXT = { '-1': '準備中', 0: '終わりました', 1: '再生中', 2: '一時停止', 3: '読み込み中', 5: '待機中' };
+const testP = makePlayer('yt-test', s => { $('playState').textContent = STATE_TEXT[s] || '-'; }, t => { $('tError').textContent = t; });
+const gameP = makePlayer('yt-game', null, t => { $('gError').textContent = t; });
 
 window.onYouTubeIframeAPIReady = function () {
   ytApiReady = true;
   setYtStatus('つながりました', 'status-ok');
-  player = new YT.Player('yt-player', {
-    width: '100%', height: '100%',
-    playerVars: { controls: 0, disablekb: 1, rel: 0, playsinline: 1, iv_load_policy: 3, fs: 0 },
-    events: {
-      onReady: () => { playerReady = true; player.setVolume(state.volume); },
-      onStateChange: e => {
-        const map = { '-1': '準備中', 0: '終わりました', 1: '再生中', 2: '一時停止', 3: '読み込み中', 5: '待機中' };
-        document.getElementById('playState').textContent = map[e.data] || '-';
-        if (e.data === 1) document.getElementById('playError').textContent = '';
-      },
-      onError: e => {
-        document.getElementById('playError').textContent =
-          'エラー ' + e.data + '：' + (YT_ERRORS[e.data] || '再生できませんでした');
-      }
-    }
-  });
+  testP.create();
+  gameP.create();
 };
-function setYtStatus(text, cls) {
-  const el = document.getElementById('ytStatus');
-  el.textContent = text; el.className = cls;
-}
+function setYtStatus(text, cls) { const el = $('ytStatus'); el.textContent = text; el.className = cls; }
 (function loadYtApi() {
   const tag = document.createElement('script');
   tag.src = 'https://www.youtube.com/iframe_api';
@@ -382,52 +709,187 @@ function setYtStatus(text, cls) {
   document.head.appendChild(tag);
   setTimeout(() => { if (!ytApiReady) setYtStatus('つながりません（ネット接続を確認）', 'status-ng'); }, 12000);
 })();
-
-function testSong() { return currentSet().songs[state.testIndex] || currentSet().songs[0]; }
-
-function playFromStart() {
-  const err = document.getElementById('playError');
-  if (!playerReady) { err.textContent = 'YouTubeの準備がまだです。少し待ってください。'; return; }
-  const song = testSong();
-  const id = parseVideoId(song && song.url);
-  if (!id) { err.textContent = 'この曲のURLが読めません（曲セットを確認）'; return; }
-  err.textContent = '';
-  player.setVolume(state.volume);
-  player.loadVideoById({ videoId: id, startSeconds: songStart(song) });
+function togglePlayer(P, song) {
+  const st = P.state();
+  if (st === 1) P.pause(); else if (st === 2) P.resume(); else P.play(song);
 }
-function pauseMain()  { if (playerReady) player.pauseVideo(); }
-function resumeMain() { if (playerReady) player.playVideo(); }
-function stopMain()   { if (playerReady) { try { player.stopVideo(); } catch (e) {} } }
-function togglePlay() {
-  if (!playerReady) return;
-  const st = player.getPlayerState();
-  if (st === 1) pauseMain();
-  else if (st === 2) resumeMain();
-  else playFromStart();
+
+// ===== ゲーム画面 =====
+function curQ() { return state.questions[state.current]; }
+function curSong() { const q = curQ(); return q ? currentSet().songs[q.song] : null; }
+
+function renderGame() {
+  const q = curQ();
+  if (!q) { show('result'); return; }
+  const song = curSong() || {};
+  $('gRound').textContent = ROUND_LABELS[q.round];
+  $('gNo').textContent = '第' + (state.current + 1) + '問 ／ 全' + state.questions.length + '問';
+  $('gPts').textContent = q.points + '点';
+  $('gError').textContent = '';
+
+  // ヒント
+  const hints = [song.hint1, song.hint2].filter(Boolean);
+  $('gHints').innerHTML = hints.slice(0, state.hintsShown).map((h, i) => '<div>ヒント' + (i + 1) + '：' + esc(h) + '</div>').join('');
+  $('gHint').disabled = state.hintsShown >= hints.length || state.phase === 'answer';
+
+  // 答え
+  const answered = state.phase === 'answer';
+  $('gCover').classList.toggle('hide', answered);
+  $('gAnswer').classList.toggle('show', answered);
+  if (answered) {
+    $('gAnsGrade').textContent = Number(song.grade) + '年生のときの曲';
+    $('gAnsTitle').textContent = song.title || '（曲名なし）';
+    const t = state.awarded[state.current];
+    $('gAnsWho').textContent = t == null ? '正解なし' : '正解：' + state.teamNames[t] + '（＋' + q.points + '点）';
+  }
+  $('gNone').disabled = answered;
+  $('gNext').disabled = !answered;
+  $('gNext').firstChild.textContent = state.current + 1 >= state.questions.length ? '結果発表へ' : '次の問題へ';
+
+  // 得点
+  const list = $('gScores');
+  list.innerHTML = '';
+  state.teamNames.forEach((nm, t) => {
+    const row = document.createElement('div');
+    row.className = 'team'; row.style.setProperty('--tc', TEAM_COLORS[t]);
+    row.innerHTML = '<div class="nm">' + esc(nm) + '</div><div class="sc">' + (state.scores[t] || 0) + '</div>' +
+      '<button' + (answered ? ' disabled' : '') + '>正解<span class="key">' + (t + 1) + '</span></button>';
+    row.querySelector('button').onclick = () => award(t);
+    list.appendChild(row);
+  });
+  $('gVol').value = state.volume; $('gVolVal').textContent = state.volume;
+}
+function award(t) {
+  if (state.phase === 'answer') return;
+  const q = curQ();
+  state.scores[t] = (state.scores[t] || 0) + q.points;
+  state.awarded[state.current] = t;
+  state.log.push({ q: state.current, team: t, points: q.points });
+  reveal();
+}
+function revealNone() {
+  if (state.phase === 'answer') return;
+  state.awarded[state.current] = null;
+  reveal();
+}
+function reveal() {
+  state.phase = 'answer';
+  // 答えを出したら映像を見せる。止まっていたら続きから流す
+  const st = gameP.state();
+  if (st === 2) gameP.resume();
+  saveState(); renderGame();
+}
+function nextQuestion() {
+  if (state.phase !== 'answer') return;
+  gameP.stop();
+  if (state.current + 1 >= state.questions.length) { show('result'); return; }
+  goQuestion(state.current + 1);
+}
+function goQuestion(i) {
+  gameP.stop();
+  state.current = i;
+  state.phase = 'ready';
+  state.hintsShown = 0;
+  if (state.awarded[i] !== undefined) {
+    // 一度答えを出した問題に戻ったときは、その加点を取り消してやり直す
+    const t = state.awarded[i];
+    if (t != null) {
+      state.scores[t] -= state.questions[i].points;
+      state.log = state.log.filter(l => l.q !== i);
+    }
+    state.awarded[i] = undefined;
+  }
+  saveState(); show('game');
+}
+function showHint() {
+  const song = curSong() || {};
+  const n = [song.hint1, song.hint2].filter(Boolean).length;
+  if (state.hintsShown < n) { state.hintsShown++; saveState(); renderGame(); }
+}
+
+// ===== 得点の修正・問題の移動（小窓） =====
+function openModal(id) { $(id).classList.add('open'); }
+function closeModals() { document.querySelectorAll('.modal').forEach(m => m.classList.remove('open')); }
+function renderScoreEdit() {
+  const box = $('scoreEdit');
+  box.innerHTML = '';
+  state.teamNames.forEach((nm, t) => {
+    const row = document.createElement('div');
+    row.className = 'row'; row.style.margin = '8px 0';
+    row.innerHTML = '<span style="flex:1;border-left:6px solid ' + TEAM_COLORS[t] + ';padding-left:8px">' + esc(nm) + '</span>' +
+      '<button class="small" data-d="-1">−1</button><b style="min-width:40px;text-align:center;font-size:24px">' + (state.scores[t] || 0) + '</b>' +
+      '<button class="small" data-d="1">＋1</button>';
+    row.querySelectorAll('button').forEach(b => b.onclick = () => {
+      state.scores[t] = (state.scores[t] || 0) + Number(b.dataset.d);
+      saveState(); renderScoreEdit(); if (state.screen === 'game') renderGame();
+    });
+    box.appendChild(row);
+  });
+  const last = state.log[state.log.length - 1];
+  $('btnUndo').disabled = !last;
+  $('undoInfo').textContent = last ? '直前の加点：第' + (last.q + 1) + '問　' + state.teamNames[last.team] + '　＋' + last.points + '点' : '';
+}
+function undoLast() {
+  const last = state.log.pop();
+  if (!last) return;
+  state.scores[last.team] -= last.points;
+  if (state.awarded[last.q] === last.team) state.awarded[last.q] = null;
+  saveState(); renderScoreEdit(); if (state.screen === 'game') renderGame();
+}
+function renderJump() {
+  const box = $('jumpList');
+  box.innerHTML = '';
+  state.questions.forEach((q, i) => {
+    const b = document.createElement('button');
+    const done = state.awarded[i] !== undefined;
+    b.textContent = '第' + (i + 1) + '問' + (q.round === 'encore' ? '（アンコール）' : '（' + q.round + '年）') + (done ? ' 済' : '');
+    if (i === state.current) b.classList.add('sel');
+    b.onclick = () => {
+      if (done && !confirm('第' + (i + 1) + '問はもう答えを出しています。やり直すと、その問題の加点は取り消されます。よいですか？')) return;
+      closeModals(); goQuestion(i);
+    };
+    box.appendChild(b);
+  });
+}
+
+// ===== 結果発表 =====
+function renderResult() {
+  const order = state.teamNames.map((nm, t) => ({ nm, t, sc: state.scores[t] || 0 })).sort((a, b) => b.sc - a.sc);
+  const box = $('resultList');
+  box.innerHTML = '';
+  let rank = 0, prev = null;
+  order.forEach((o, k) => {
+    if (o.sc !== prev) { rank = k + 1; prev = o.sc; }
+    const mem = state.members.filter(m => m.team === o.t).map(m => m.name).join('・');
+    const div = document.createElement('div');
+    div.className = 'rank'; div.style.setProperty('--tc', TEAM_COLORS[o.t]);
+    div.innerHTML = '<div class="no">' + rank + '位</div><div class="nm">' + esc(o.nm) + '<div class="mem">' + esc(mem) + '</div></div><div class="sc">' + o.sc + '点</div>';
+    box.appendChild(div);
+  });
 }
 
 // ===== 再生テスト画面 =====
+let coverOn = true;
+function testSong() { return currentSet().songs[state.testIndex] || currentSet().songs[0]; }
 function renderTest() {
-  const list = document.getElementById('songList');
+  const list = $('songList');
   list.innerHTML = '';
   currentSet().songs.forEach((s, i) => {
     const b = document.createElement('button');
     b.textContent = s.grade + '年　' + (s.title || '（曲名なし）');
     if (i === state.testIndex) b.classList.add('sel');
-    b.onclick = () => { stopMain(); state.testIndex = i; saveState(); renderTest(); };
+    b.onclick = () => { testP.stop(); state.testIndex = i; saveState(); renderTest(); };
     list.appendChild(b);
   });
   const song = testSong();
-  document.getElementById('testTitle').textContent = song ? song.title : '-';
-  document.getElementById('vol').value = state.volume;
-  document.getElementById('volVal').textContent = state.volume;
+  $('testTitle').textContent = song ? song.title : '-';
+  $('tVol').value = state.volume; $('tVolVal').textContent = state.volume;
 }
 
-// ===== 埋め込みチェック（画面の外の小さなプレーヤーで1曲ずつ試す） =====
+// ===== 埋め込みチェック =====
 let checker = null, checkerReady = false, checkQueue = [], checkCur = null, checkTimer = null, checkResults = {};
-
 function renderCheckTable() {
-  const body = document.getElementById('checkBody');
+  const body = $('checkBody');
   body.innerHTML = '';
   currentSet().songs.forEach((s, i) => {
     const r = checkResults[i];
@@ -437,16 +899,15 @@ function renderCheckTable() {
     body.appendChild(tr);
   });
   const vals = Object.values(checkResults);
-  document.getElementById('checkSummary').textContent = vals.length
-    ? 'OK ' + vals.filter(v => v.cls === 'status-ok').length + '曲／要対応 ' + vals.filter(v => v.cls !== 'status-ok').length + '曲'
-    : '';
+  $('checkSummary').textContent = vals.length
+    ? 'OK ' + vals.filter(v => v.cls === 'status-ok').length + '曲／要対応 ' + vals.filter(v => v.cls !== 'status-ok').length + '曲' : '';
 }
 function startCheck() {
   if (!ytApiReady) { alert('YouTubeにつながっていません。ネット接続を確認してください。'); return; }
   checkResults = {};
   checkQueue = currentSet().songs.map((_, i) => i);
   renderCheckTable();
-  document.getElementById('btnCheckRun').disabled = true;
+  $('btnCheckRun').disabled = true;
   if (!checker) {
     checker = new YT.Player('check-player', {
       width: 320, height: 180,
@@ -457,16 +918,10 @@ function startCheck() {
         onError: e => checkFinish('status-ng', 'エラー ' + e.data + '：' + (YT_ERRORS[e.data] || '再生できません'))
       }
     });
-  } else if (checkerReady) {
-    checkNext();
-  }
+  } else if (checkerReady) checkNext();
 }
 function checkNext() {
-  if (!checkQueue.length) {
-    document.getElementById('btnCheckRun').disabled = false;
-    renderCheckTable();
-    return;
-  }
+  if (!checkQueue.length) { $('btnCheckRun').disabled = false; renderCheckTable(); return; }
   const i = checkQueue.shift();
   const song = currentSet().songs[i];
   const id = parseVideoId(song.url);
@@ -479,7 +934,7 @@ function checkNext() {
   checkTimer = setTimeout(() => checkFinish('status-warn', '時間切れ（通信が遅い可能性。もう一度試してください）'), 15000);
 }
 function checkFinish(cls, msg) {
-  if (checkCur === null) return;   // 二重に結果が来たときは無視
+  if (checkCur === null) return;
   clearTimeout(checkTimer);
   checkResults[checkCur] = { cls, msg };
   checkCur = null;
@@ -493,19 +948,15 @@ function exportState() {
   saveState();
   const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
   const d = new Date();
-  const name = 'introdon_save_' + d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0') +
-    '_' + String(d.getHours()).padStart(2, '0') + String(d.getMinutes()).padStart(2, '0') + '.json';
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob); a.download = name;
+  a.href = URL.createObjectURL(blob);
+  a.download = 'introdon_save_' + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '_' + pad(d.getHours()) + pad(d.getMinutes()) + '.json';
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 function readJsonFile(file, cb) {
   const r = new FileReader();
-  r.onload = () => {
-    try { cb(JSON.parse(r.result)); }
-    catch (e) { alert('ファイルの中身が読めませんでした（JSON形式か確認してください）'); }
-  };
+  r.onload = () => { try { cb(JSON.parse(r.result)); } catch (e) { alert('ファイルの中身が読めませんでした（JSON形式か確認してください）'); } };
   r.readAsText(file, 'utf-8');
 }
 function importState(file) {
@@ -513,7 +964,7 @@ function importState(file) {
     if (!obj || obj.version !== 1 || !obj.screen) { alert('このアプリの保存ファイルではないようです'); return; }
     state = Object.assign(newState(), obj);
     if (!allSets().some(s => s.id === state.setId)) alert('保存ファイルの曲セットが見つかりません。先に同じ曲セットを読み込んでください。');
-    show(state.screen);
+    resumeInto(state.screen);
   });
 }
 function importSet(file) {
@@ -523,72 +974,114 @@ function importSet(file) {
     importedSets.push(set);
     saveImportedSets();
     state.setId = set.id;
-    saveState();
-    renderStart();
+    saveState(); renderStart();
     alert('「' + set.name + '」を読み込みました（' + set.songs.length + '曲）');
   });
 }
+// 再開：ゲーム中なら、その問題の「まだ流していない」か「答えを出した」状態から
+function resumeInto(screen) { show(screen); }
 
-function esc(s) {
-  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-}
+// ===== ボタンのつなぎこみ =====
+$('setSelect').onchange = e => { state.setId = e.target.value; checkResults = {}; saveState(); renderStart(); };
+$('importSetInput').onchange = e => { if (e.target.files[0]) importSet(e.target.files[0]); e.target.value = ''; };
+$('importStateInput').onchange = e => { if (e.target.files[0]) importState(e.target.files[0]); e.target.value = ''; };
+$('importStateInput2').onchange = e => { if (e.target.files[0]) importState(e.target.files[0]); e.target.value = ''; closeMenu(); };
 
-// ===== ボタンとキーボードのつなぎこみ =====
-document.getElementById('setSelect').onchange = e => { state.setId = e.target.value; checkResults = {}; saveState(); renderStart(); };
-document.getElementById('importSetInput').onchange = e => { if (e.target.files[0]) importSet(e.target.files[0]); e.target.value = ''; };
-document.getElementById('importStateInput').onchange = e => { if (e.target.files[0]) importState(e.target.files[0]); e.target.value = ''; };
-document.getElementById('importStateInput2').onchange = e => { if (e.target.files[0]) importState(e.target.files[0]); e.target.value = ''; closeMenu(); };
-
-document.getElementById('btnNew').onclick = () => {
+$('btnNew').onclick = () => {
   const saved = loadSaved();
   if (saved && saved.screen !== 'start' && !confirm('前回の続きのデータは消えます。新しく始めますか？')) return;
   const keepSet = state.setId, keepVol = state.volume;
   state = newState(keepSet); state.volume = keepVol;
   show('members');
 };
-document.getElementById('btnResume').onclick = () => {
+$('btnResume').onclick = () => {
   const saved = loadSaved();
   if (!saved) return;
   state = Object.assign(newState(), saved);
-  show(state.screen);
+  resumeInto(state.screen);
 };
-document.getElementById('btnTest').onclick = () => show('test');
-document.getElementById('btnCheck').onclick = () => show('check');
-document.getElementById('btnTestBack').onclick = () => show('start');
-document.getElementById('btnCheckBack').onclick = () => show('start');
-document.getElementById('btnMembersBack').onclick = () => show('start');
-document.getElementById('btnCheckRun').onclick = startCheck;
+$('btnTest').onclick = () => show('test');
+$('btnCheck').onclick = () => show('check');
+$('btnTestBack').onclick = () => show('start');
+$('btnCheckBack').onclick = () => show('start');
+$('btnCheckRun').onclick = startCheck;
 
-document.getElementById('btnPlay').onclick = playFromStart;
-document.getElementById('btnPause').onclick = pauseMain;
-document.getElementById('btnResumePlay').onclick = resumeMain;
-document.getElementById('vol').oninput = e => {
-  state.volume = Number(e.target.value);
-  document.getElementById('volVal').textContent = state.volume;
-  if (playerReady) player.setVolume(state.volume);
+// メンバー登録
+$('teamCount').onchange = e => setTeamCount(Number(e.target.value));
+$('btnAddMember').onclick = () => { state.members.push({ name: '', part: '', team: null }); saveState(); renderMembers(); };
+$('btnBulkToggle').onclick = () => { const b = $('bulkBox'); b.style.display = b.style.display === 'none' ? 'block' : 'none'; };
+$('btnBulkAdd').onclick = addBulk;
+$('btnMembersBack').onclick = () => show('start');
+$('btnToTeams').onclick = () => {
+  state.members = state.members.filter(m => (m.name || '').trim() || (m.part || '').trim());
+  if (state.members.length < 2) { $('memberError').textContent = 'メンバーを2人以上入力してください。'; renderMembers(); $('memberError').textContent = 'メンバーを2人以上入力してください。'; return; }
+  show('teams');
 };
-document.getElementById('vol').onchange = saveState;
-document.getElementById('btnCover').onclick = () => {
+
+// チーム分け
+$('btnRandomTeams').onclick = randomTeams;
+$('btnTeamsBack').onclick = () => show('members');
+$('btnStartGame').onclick = startGame;
+
+// ゲーム
+$('gPlay').onclick = () => gameP.play(curSong());
+$('gPause').onclick = () => gameP.pause();
+$('gResume').onclick = () => gameP.resume();
+$('gHint').onclick = showHint;
+$('gNone').onclick = revealNone;
+$('gNext').onclick = nextQuestion;
+$('gVol').oninput = e => { state.volume = Number(e.target.value); $('gVolVal').textContent = state.volume; gameP.vol(state.volume); };
+$('gVol').onchange = saveState;
+
+// 結果
+$('btnResultBack').onclick = () => { state.current = state.questions.length - 1; state.phase = 'answer'; show('game'); };
+$('btnResultHome').onclick = () => show('start');
+
+// 再生テスト
+$('tPlay').onclick = () => testP.play(testSong());
+$('tPause').onclick = () => testP.pause();
+$('tResume').onclick = () => testP.resume();
+$('tVol').oninput = e => { state.volume = Number(e.target.value); $('tVolVal').textContent = state.volume; testP.vol(state.volume); };
+$('tVol').onchange = saveState;
+$('btnCover').onclick = () => {
   coverOn = !coverOn;
-  document.getElementById('cover').classList.toggle('hide', !coverOn);
-  document.getElementById('btnCover').textContent = coverOn ? '映像を見せる' : '映像を隠す';
+  $('tCover').classList.toggle('hide', !coverOn);
+  $('btnCover').textContent = coverOn ? '映像を見せる' : '映像を隠す';
 };
 
+// 小窓
+$('btnUndo').onclick = undoLast;
+document.querySelectorAll('[data-close]').forEach(b => b.onclick = closeModals);
+document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', e => { if (e.target === m) closeModals(); }));
+
+// キーボード
 document.addEventListener('keydown', e => {
-  if (state.screen !== 'test') return;
   if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
-  if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
-  if (e.key === 'r' || e.key === 'R') playFromStart();
+  if (document.querySelector('.modal.open')) { if (e.key === 'Escape') closeModals(); return; }
+  if (state.screen === 'test') {
+    if (e.code === 'Space') { e.preventDefault(); togglePlayer(testP, testSong()); }
+    if (e.key === 'r' || e.key === 'R') testP.play(testSong());
+  }
+  if (state.screen === 'game') {
+    if (e.code === 'Space') { e.preventDefault(); togglePlayer(gameP, curSong()); }
+    else if (e.key === 'r' || e.key === 'R') gameP.play(curSong());
+    else if (e.key === 'h' || e.key === 'H') showHint();
+    else if (e.key === 'n' || e.key === 'N' || e.key === 'ArrowRight') nextQuestion();
+    else if (e.key === '0') revealNone();
+    else if (/^[1-6]$/.test(e.key) && Number(e.key) <= state.teamNames.length) award(Number(e.key) - 1);
+  }
 });
 
 // 司会メニュー
-function closeMenu() { document.getElementById('menuPanel').classList.remove('open'); }
-document.getElementById('menuBtn').onclick = () => document.getElementById('menuPanel').classList.toggle('open');
-document.getElementById('menuPanel').addEventListener('click', e => {
+function closeMenu() { $('menuPanel').classList.remove('open'); }
+$('menuBtn').onclick = () => $('menuPanel').classList.toggle('open');
+$('menuPanel').addEventListener('click', e => {
   const act = e.target.dataset && e.target.dataset.act;
   if (!act) return;
   if (act === 'home') show('start');
   if (act === 'export') exportState();
+  if (act === 'score') { renderScoreEdit(); openModal('scoreModal'); }
+  if (act === 'jump') { renderJump(); openModal('jumpModal'); }
   if (act === 'clear' && confirm('ブラウザに保存した進行データを消しますか？（曲セットは消えません）')) {
     clearSaved(); setBadge('保存データを消しました'); renderStart();
   }
@@ -601,8 +1094,8 @@ loadImportedSets();
   const saved = loadSaved();
   if (saved) { state.setId = saved.setId || state.setId; state.volume = saved.volume || state.volume; }
   if (!allSets().some(s => s.id === state.setId)) state.setId = SONG_SETS[0].id;
-  // 起動時は必ず「はじめの画面」。続きは「続きから」ボタンで戻る（保存データは上書きしない）
-  document.getElementById('screen-start').classList.add('active');
+  $('screen-start').classList.add('active');
+  document.querySelectorAll('.game-only').forEach(b => b.style.display = 'none');
   renderStart();
 })();
 </script>
