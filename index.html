@@ -118,6 +118,51 @@
   .rank .mem{font-size:14px;color:var(--muted)}
 
   #check-holder{position:fixed;left:-9999px;top:0;width:320px;height:180px}
+
+  /* ===== 演出：カーテン（紺に金の縁取り。開くと答えが見える） ===== */
+  .curtain{position:absolute;inset:0;z-index:2;pointer-events:none}
+  .curtain .panel{position:absolute;top:0;bottom:0;width:50.5%;
+    background:
+      repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 6px,rgba(0,0,0,.18) 6px 22px,rgba(255,255,255,.04) 22px 30px),
+      linear-gradient(180deg,#22386a,#13234a 60%,#0d1a38);
+    transition:transform 1.3s cubic-bezier(.7,0,.25,1)}
+  .curtain .panel.l{left:0;border-right:3px solid var(--gold);box-shadow:inset -14px 0 24px rgba(0,0,0,.35)}
+  .curtain .panel.r{right:0;border-left:3px solid var(--gold);box-shadow:inset 14px 0 24px rgba(0,0,0,.35)}
+  .curtain .valance{position:absolute;left:0;right:0;top:0;height:14%;z-index:1;
+    background:linear-gradient(180deg,#1b2d58,#13234a);border-bottom:2px solid var(--gold);
+    box-shadow:0 4px 12px rgba(0,0,0,.4)}
+  .curtain .label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2;transition:opacity .4s}
+  .curtain .label .note{font-size:96px;color:var(--gold);line-height:1;text-shadow:0 0 24px rgba(212,175,90,.5)}
+  .curtain .label .q{font-size:26px;margin-top:8px}
+  .curtain.playing .label .note{animation:pulse 1s ease-in-out infinite}
+  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+  .curtain.open .panel.l{transform:translateX(-100%)}
+  .curtain.open .panel.r{transform:translateX(100%)}
+  .curtain.open .label{opacity:0}
+  .curtain.open .valance{transform:translateY(-100%);transition:transform .6s .9s}
+  .answer{display:block;opacity:0;visibility:hidden;transform:translateY(16px);transition:opacity .5s,transform .5s,visibility .5s}
+  .answer.show{opacity:1;visibility:visible;transform:none;transition-delay:.9s}
+
+  /* ===== 演出：メンバー紹介 ===== */
+  #screen-intro.active{display:flex}
+  #screen-intro{min-height:calc(100vh - 140px);flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative}
+  .intro-stage{min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .intro-team{font-size:72px;font-weight:bold;letter-spacing:.1em;color:var(--tc,var(--gold));animation:zoomIn .7s ease-out both}
+  .intro-team small{display:block;font-size:22px;color:var(--muted);letter-spacing:.3em;font-weight:normal;margin-bottom:6px}
+  .intro-part{font-size:30px;color:var(--gold);letter-spacing:.2em;animation:slideIn .6s ease-out both}
+  .intro-name{font-size:84px;font-weight:bold;margin-top:6px;animation:slideIn .6s .25s ease-out both}
+  .intro-team-tag{margin-top:18px;font-size:20px;padding:4px 18px;border-radius:999px;border:2px solid var(--tc);color:var(--tc);animation:fadeIn .6s .5s both}
+  .intro-go{font-size:64px;font-weight:bold;color:var(--gold);animation:zoomIn .8s ease-out both}
+  @keyframes zoomIn{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+  @keyframes slideIn{from{opacity:0;transform:translateX(-60px)}to{opacity:1;transform:none}}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .intro-dots{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:24px 0 12px}
+  .intro-dots i{width:10px;height:10px;border-radius:50%;background:var(--navy3);border:1px solid var(--gold-soft)}
+  .intro-dots i.on{background:var(--gold)}
+  .intro-ctl{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+
+  /* 紙吹雪 */
+  #confetti{position:fixed;inset:0;pointer-events:none;z-index:80}
 </style>
 </head>
 <body>
@@ -127,6 +172,7 @@
   <button data-act="home">はじめの画面へ</button>
   <button data-act="score" class="game-only">得点を修正する</button>
   <button data-act="jump" class="game-only">◯問目へ移動する</button>
+  <button data-act="sfx" id="menuSfx">効果音：オン</button>
   <button data-act="export">状態を書き出す（ファイル保存）</button>
   <label class="filebtn">状態を読み込む
     <input type="file" id="importStateInput2" accept=".json,application/json">
@@ -246,10 +292,21 @@
     </div>
     <div class="row">
       <button id="btnTeamsBack">← メンバー登録へ</button>
-      <button class="primary" id="btnStartGame">ゲームを始める →</button>
+      <button class="primary" id="btnStartGame">メンバー紹介へ →</button>
     </div>
-    <p class="muted">メンバー紹介の演出は③で、この画面とゲームの間に入ります。</p>
     <p class="status-ng" id="teamError"></p>
+  </section>
+
+  <!-- ===== メンバー紹介 ===== -->
+  <section class="screen" id="screen-intro">
+    <div class="intro-stage" id="introStage"></div>
+    <div class="intro-dots" id="introDots"></div>
+    <div class="intro-ctl">
+      <button id="introPrev">← 戻る</button>
+      <button class="primary" id="introNext">次へ →<span class="key">␣</span></button>
+      <button id="introAuto">自動で進める</button>
+      <button id="introSkip">紹介をとばして開始</button>
+    </div>
   </section>
 
   <!-- ===== ゲーム ===== -->
@@ -262,7 +319,10 @@
       <div>
         <div class="stage">
           <div class="yt" id="yt-game"></div>
-          <div class="cover" id="gCover"><div class="note">♪</div><div class="q">何の曲？</div></div>
+          <div class="curtain" id="gCurtain">
+            <div class="panel l"></div><div class="panel r"></div><div class="valance"></div>
+            <div class="label"><div class="note">♪</div><div class="q">何の曲？</div></div>
+          </div>
           <div class="answer" id="gAnswer"><div class="g" id="gAnsGrade"></div><div class="t" id="gAnsTitle"></div><div class="muted" id="gAnsWho"></div></div>
         </div>
         <div class="hints" id="gHints"></div>
@@ -347,6 +407,7 @@
 </div>
 
 <div id="check-holder"><div id="check-player"></div></div>
+<canvas id="confetti"></canvas>
 
 <script>
 'use strict';
@@ -399,7 +460,7 @@ const ROUND_LABELS = { 1: '第1楽章　1年の曲', 2: '第2楽章　2年の曲
 // ===== 保存に使う名前（変えると過去の保存データは読まれなくなる） =====
 const KEY_STATE = 'introdon_state_v1';
 const KEY_SETS  = 'introdon_sets_v1';
-const SCREEN_NAMES = { start: 'はじめの画面', test: '再生テスト', check: '埋め込みチェック', members: 'メンバー登録', teams: 'チーム分け', game: 'ゲーム', result: '結果発表' };
+const SCREEN_NAMES = { start: 'はじめの画面', test: '再生テスト', check: '埋め込みチェック', members: 'メンバー登録', teams: 'チーム分け', intro: 'メンバー紹介', game: 'ゲーム', result: '結果発表' };
 
 const YT_ERRORS = {
   2: 'URLが正しくありません', 5: 'このブラウザで再生できません', 100: '動画が削除されたか非公開です',
@@ -424,6 +485,8 @@ function newState(setId) {
     scores: [],         // チームごとの得点
     awarded: [],        // 問題ごとに加点したチーム（null=正解なし）
     log: [],            // 加点の記録（取り消し用）{ q, team, points }
+    introIndex: 0,      // メンバー紹介の何枚目か
+    sfx: true,          // 効果音のオン・オフ
     savedAt: null
   };
 }
@@ -494,7 +557,9 @@ function show(name) {
   state.screen = name;
   if (name !== 'test') testP.stop();
   if (name !== 'game') gameP.stop();
+  if (name !== 'intro') stopIntroAuto();
   if (name === 'start') renderStart();
+  if (name === 'intro') renderIntro();
   if (name === 'members') renderMembers();
   if (name === 'teams') renderTeams();
   if (name === 'game') renderGame();
@@ -658,7 +723,151 @@ function startGame() {
   state.scores = state.teamNames.map(() => 0);
   state.awarded = qs.map(() => undefined);
   state.log = [];
-  show('game');
+  state.introIndex = 0;
+  show('intro');
+}
+
+// ===== メンバー紹介（チームごとに、チーム名 → 1人ずつ「パート＋名前」） =====
+function introSlides() {
+  const slides = [];
+  state.teamNames.forEach((nm, t) => {
+    slides.push({ type: 'team', t });
+    state.members.forEach((m, i) => { if (m.team === t) slides.push({ type: 'member', i, t }); });
+  });
+  slides.push({ type: 'go' });
+  return slides;
+}
+let introTimer = null;
+function renderIntro() {
+  const slides = introSlides();
+  if (state.introIndex >= slides.length) state.introIndex = slides.length - 1;
+  const s = slides[state.introIndex];
+  const stage = $('introStage');
+  if (s.type === 'team') {
+    stage.innerHTML = '<div class="intro-team" style="--tc:' + TEAM_COLORS[s.t] + '"><small>TEAM ' + (s.t + 1) + '</small>' + esc(state.teamNames[s.t]) + '</div>';
+    sfx('team');
+  } else if (s.type === 'member') {
+    const m = state.members[s.i];
+    stage.innerHTML = '<div class="intro-part">' + esc(m.part || '') + '</div>' +
+      '<div class="intro-name">' + esc(m.name || '') + '</div>' +
+      '<div class="intro-team-tag" style="--tc:' + TEAM_COLORS[s.t] + '">' + esc(state.teamNames[s.t]) + '</div>';
+    sfx('member');
+  } else {
+    stage.innerHTML = '<div class="intro-go">♪ それでは、はじめましょう！</div>';
+    sfx('team');
+  }
+  $('introDots').innerHTML = slides.map((_, k) => '<i' + (k <= state.introIndex ? ' class="on"' : '') + '></i>').join('');
+  $('introPrev').disabled = state.introIndex === 0;
+  $('introNext').firstChild.textContent = s.type === 'go' ? 'ゲーム開始 →' : '次へ →';
+}
+function introNext() {
+  const slides = introSlides();
+  if (state.introIndex >= slides.length - 1) { stopIntroAuto(); show('game'); return; }
+  state.introIndex++;
+  saveState(); renderIntro();
+}
+function introPrev() {
+  if (state.introIndex > 0) { state.introIndex--; saveState(); renderIntro(); }
+}
+function toggleIntroAuto() {
+  if (introTimer) { stopIntroAuto(); return; }
+  $('introAuto').textContent = '自動を止める';
+  introTimer = setInterval(() => {
+    const slides = introSlides();
+    if (state.introIndex >= slides.length - 1) { stopIntroAuto(); return; } // 最後の「はじめましょう」で止まる
+    introNext();
+  }, 2600);
+}
+function stopIntroAuto() {
+  if (introTimer) clearInterval(introTimer);
+  introTimer = null;
+  const b = $('introAuto'); if (b) b.textContent = '自動で進める';
+}
+
+// ===== 効果音（音声ファイルを使わず、ブラウザの中で音を作る） =====
+let audioCtx = null;
+function ac() {
+  if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+// 金管っぽい音を1つ鳴らす（freq=高さ、t=開始までの秒、dur=長さ）
+function brass(freq, t, dur, vol) {
+  const c = ac(); if (!c) return;
+  const t0 = c.currentTime + t;
+  const o1 = c.createOscillator(), o2 = c.createOscillator(), f = c.createBiquadFilter(), g = c.createGain();
+  o1.type = 'sawtooth'; o2.type = 'sawtooth';
+  o1.frequency.value = freq; o2.frequency.value = freq * 1.004;
+  f.type = 'lowpass'; f.frequency.setValueAtTime(freq * 2, t0); f.frequency.linearRampToValueAtTime(freq * 6, t0 + 0.08);
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol, t0 + 0.04);
+  g.gain.setValueAtTime(vol * 0.8, t0 + dur - 0.08);
+  g.gain.linearRampToValueAtTime(0, t0 + dur);
+  o1.connect(f); o2.connect(f); f.connect(g); g.connect(c.destination);
+  o1.start(t0); o2.start(t0); o1.stop(t0 + dur + 0.05); o2.stop(t0 + dur + 0.05);
+}
+// 鉄琴っぽい「ポン」
+function bell(freq, t, vol) {
+  const c = ac(); if (!c) return;
+  const t0 = c.currentTime + t;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(0.001, t0 + 0.9);
+  o.connect(g); g.connect(c.destination); o.start(t0); o.stop(t0 + 1);
+}
+function sfx(kind) {
+  if (!state.sfx) return;
+  const C5 = 523.25, E5 = 659.25, G5 = 783.99, C6 = 1046.5, G4 = 392.0, Bb4 = 466.16;
+  if (kind === 'correct') {
+    // ファンファーレ：タタタ・ターン
+    brass(G4, 0, 0.12, 0.12); brass(G4, 0.14, 0.12, 0.12); brass(G4, 0.28, 0.12, 0.12);
+    [C5, E5, G5].forEach(f => brass(f, 0.44, 0.9, 0.08));
+    brass(C6, 0.44, 0.9, 0.06);
+    duckMusic(1.6);
+  } else if (kind === 'none') {
+    // 正解なし：ちょっと残念な下がり音
+    brass(Bb4, 0, 0.3, 0.08); brass(G4 * 0.89, 0.32, 0.6, 0.08);
+    duckMusic(1.0);
+  } else if (kind === 'team') {
+    [C5, E5, G5].forEach((f, i) => bell(f * 2, i * 0.07, 0.12));
+  } else if (kind === 'member') {
+    bell(G5 * 2, 0, 0.1);
+  }
+}
+// 効果音の間だけ曲の音量を下げる
+let duckTimer = null;
+function duckMusic(sec) {
+  if (!gameP.ready) return;
+  gameP.vol(Math.round(state.volume * 0.3));
+  clearTimeout(duckTimer);
+  duckTimer = setTimeout(() => gameP.vol(state.volume), sec * 1000);
+}
+
+// ===== 紙吹雪 =====
+function confetti(color) {
+  const cv = $('confetti');
+  const ctx = cv.getContext && cv.getContext('2d');
+  if (!ctx) return;
+  cv.width = window.innerWidth; cv.height = window.innerHeight;
+  const colors = [color, '#d4af5a', '#f4efe2', color];
+  const ps = Array.from({ length: 160 }, () => ({
+    x: Math.random() * cv.width, y: -20 - Math.random() * cv.height * 0.5,
+    w: 6 + Math.random() * 8, h: 8 + Math.random() * 10,
+    vy: 2.5 + Math.random() * 3.5, vx: -1.5 + Math.random() * 3,
+    r: Math.random() * Math.PI, vr: -0.2 + Math.random() * 0.4,
+    c: colors[Math.floor(Math.random() * colors.length)]
+  }));
+  const end = performance.now() + 3200;
+  (function frame(now) {
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ps.forEach(p => {
+      p.y += p.vy; p.x += p.vx + Math.sin(p.y / 30); p.r += p.vr;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r);
+      ctx.fillStyle = p.c; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h * Math.abs(Math.cos(p.r)));
+      ctx.restore();
+    });
+    if (now < end) requestAnimationFrame(frame); else ctx.clearRect(0, 0, cv.width, cv.height);
+  })(performance.now());
 }
 
 // ===== YouTubeプレーヤー（本番用・テスト用の2つ） =====
@@ -693,7 +902,7 @@ function makePlayer(elId, onStateText, onErrorText) {
 }
 const STATE_TEXT = { '-1': '準備中', 0: '終わりました', 1: '再生中', 2: '一時停止', 3: '読み込み中', 5: '待機中' };
 const testP = makePlayer('yt-test', s => { $('playState').textContent = STATE_TEXT[s] || '-'; }, t => { $('tError').textContent = t; });
-const gameP = makePlayer('yt-game', null, t => { $('gError').textContent = t; });
+const gameP = makePlayer('yt-game', s => { $('gCurtain').classList.toggle('playing', s === 1); }, t => { $('gError').textContent = t; });
 
 window.onYouTubeIframeAPIReady = function () {
   ytApiReady = true;
@@ -734,7 +943,7 @@ function renderGame() {
 
   // 答え
   const answered = state.phase === 'answer';
-  $('gCover').classList.toggle('hide', answered);
+  $('gCurtain').classList.toggle('open', answered);
   $('gAnswer').classList.toggle('show', answered);
   if (answered) {
     $('gAnsGrade').textContent = Number(song.grade) + '年生のときの曲';
@@ -765,11 +974,14 @@ function award(t) {
   state.scores[t] = (state.scores[t] || 0) + q.points;
   state.awarded[state.current] = t;
   state.log.push({ q: state.current, team: t, points: q.points });
+  sfx('correct');
+  confetti(TEAM_COLORS[t]);
   reveal();
 }
 function revealNone() {
   if (state.phase === 'answer') return;
   state.awarded[state.current] = null;
+  sfx('none');
   reveal();
 }
 function reveal() {
@@ -1033,6 +1245,12 @@ $('gNext').onclick = nextQuestion;
 $('gVol').oninput = e => { state.volume = Number(e.target.value); $('gVolVal').textContent = state.volume; gameP.vol(state.volume); };
 $('gVol').onchange = saveState;
 
+// メンバー紹介
+$('introNext').onclick = introNext;
+$('introPrev').onclick = introPrev;
+$('introAuto').onclick = toggleIntroAuto;
+$('introSkip').onclick = () => { stopIntroAuto(); show('game'); };
+
 // 結果
 $('btnResultBack').onclick = () => { state.current = state.questions.length - 1; state.phase = 'answer'; show('game'); };
 $('btnResultHome').onclick = () => show('start');
@@ -1062,6 +1280,10 @@ document.addEventListener('keydown', e => {
     if (e.code === 'Space') { e.preventDefault(); togglePlayer(testP, testSong()); }
     if (e.key === 'r' || e.key === 'R') testP.play(testSong());
   }
+  if (state.screen === 'intro') {
+    if (e.code === 'Space' || e.key === 'ArrowRight' || e.key === 'Enter') { e.preventDefault(); introNext(); }
+    if (e.key === 'ArrowLeft') introPrev();
+  }
   if (state.screen === 'game') {
     if (e.code === 'Space') { e.preventDefault(); togglePlayer(gameP, curSong()); }
     else if (e.key === 'r' || e.key === 'R') gameP.play(curSong());
@@ -1080,6 +1302,7 @@ $('menuPanel').addEventListener('click', e => {
   if (!act) return;
   if (act === 'home') show('start');
   if (act === 'export') exportState();
+  if (act === 'sfx') { state.sfx = !state.sfx; saveState(); renderSfxLabel(); }
   if (act === 'score') { renderScoreEdit(); openModal('scoreModal'); }
   if (act === 'jump') { renderJump(); openModal('jumpModal'); }
   if (act === 'clear' && confirm('ブラウザに保存した進行データを消しますか？（曲セットは消えません）')) {
@@ -1094,10 +1317,13 @@ loadImportedSets();
   const saved = loadSaved();
   if (saved) { state.setId = saved.setId || state.setId; state.volume = saved.volume || state.volume; }
   if (!allSets().some(s => s.id === state.setId)) state.setId = SONG_SETS[0].id;
+  if (saved && typeof saved.sfx === 'boolean') state.sfx = saved.sfx;
   $('screen-start').classList.add('active');
   document.querySelectorAll('.game-only').forEach(b => b.style.display = 'none');
+  renderSfxLabel();
   renderStart();
 })();
+function renderSfxLabel() { $('menuSfx').textContent = '効果音：' + (state.sfx ? 'オン' : 'オフ'); }
 </script>
 </body>
 </html>
