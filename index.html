@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>吹奏楽部 イントロドン</title>
+<style>
+  /* ===== 色と文字（モダン五線譜の土台。③で本格的に作り込む） ===== */
+  :root{
+    --navy:#0d1830; --navy2:#16264a; --navy3:#1f3462;
+    --gold:#d4af5a; --gold-soft:rgba(212,175,90,.28);
+    --ink:#f4efe2; --muted:#a9b3c9; --ok:#6fd3a0; --warn:#ffd27a; --ng:#ff8a8a;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%}
+  body{
+    background:radial-gradient(ellipse at top,var(--navy3),var(--navy) 70%);
+    color:var(--ink);
+    font-family:"Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif;
+    font-size:18px;
+  }
+  /* 五線（5本の細い金線） */
+  .staff{height:44px;margin:0 0 8px;
+    background:repeating-linear-gradient(to bottom,var(--gold-soft) 0 1px,transparent 1px 10px);
+    background-size:100% 41px;background-repeat:no-repeat;background-position:0 2px;opacity:.9}
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 28px 60px}
+  h1{font-size:44px;margin:4px 0 2px;letter-spacing:.08em}
+  h1 small{display:block;font-size:16px;color:var(--gold);letter-spacing:.3em;font-weight:normal}
+  h2{font-size:28px;margin:8px 0 16px;color:var(--gold)}
+  .screen{display:none}
+  .screen.active{display:block}
+  .card{background:rgba(22,38,74,.78);border:1px solid var(--gold-soft);border-radius:14px;padding:20px 22px;margin:14px 0}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  button,select,.filebtn{
+    font:inherit;color:var(--ink);background:var(--navy2);
+    border:1px solid var(--gold);border-radius:10px;padding:12px 20px;cursor:pointer;
+  }
+  button:hover,.filebtn:hover{background:var(--navy3)}
+  button.primary{background:var(--gold);color:var(--navy);font-weight:bold}
+  button.primary:hover{filter:brightness(1.08)}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  select{min-width:320px}
+  .filebtn input{display:none}
+  .muted{color:var(--muted);font-size:15px}
+  .status-ok{color:var(--ok)} .status-warn{color:var(--warn)} .status-ng{color:var(--ng)}
+  .notice{border-left:4px solid var(--warn);padding:10px 14px;background:rgba(255,210,122,.08);margin:12px 0;border-radius:6px}
+
+  /* 司会メニュー */
+  #menuBtn{position:fixed;top:14px;right:16px;z-index:50;padding:8px 14px;font-size:15px}
+  #menuPanel{position:fixed;top:60px;right:16px;z-index:50;display:none;flex-direction:column;gap:8px;
+    background:var(--navy2);border:1px solid var(--gold);border-radius:12px;padding:12px;width:260px}
+  #menuPanel.open{display:flex}
+  #menuPanel button{font-size:15px;padding:10px 12px;text-align:left}
+  #saveBadge{position:fixed;bottom:12px;right:16px;font-size:13px;color:var(--muted)}
+
+  /* 再生テスト */
+  .stage{position:relative;width:480px;max-width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;border:1px solid var(--gold-soft);background:#000}
+  .stage #yt-player{position:absolute;inset:0;width:100%;height:100%}
+  .cover{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:radial-gradient(circle,var(--navy3),var(--navy));z-index:2;transition:opacity .4s}
+  .cover .note{font-size:90px;color:var(--gold);line-height:1}
+  .cover.hide{opacity:0;pointer-events:none}
+  .songlist{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .songlist button{font-size:15px;padding:8px 12px}
+  .songlist button.sel{background:var(--gold);color:var(--navy)}
+  .bigctl button{font-size:20px;padding:14px 22px}
+  input[type=range]{width:220px;accent-color:var(--gold)}
+
+  /* 埋め込みチェック表 */
+  table{width:100%;border-collapse:collapse;font-size:16px}
+  th,td{border-bottom:1px solid var(--gold-soft);padding:8px 6px;text-align:left}
+  th{color:var(--gold);font-weight:normal}
+
+  /* チェック用の小さなプレーヤー（画面の外に置く） */
+  #check-holder{position:fixed;left:-9999px;top:0;width:320px;height:180px}
+</style>
+</head>
+<body>
+
+<button id="menuBtn">≡ 司会メニュー</button>
+<div id="menuPanel">
+  <button data-act="home">はじめの画面へ</button>
+  <button data-act="export">状態を書き出す（ファイル保存）</button>
+  <label class="filebtn" style="font-size:15px;padding:10px 12px">状態を読み込む
+    <input type="file" id="importStateInput2" accept=".json,application/json">
+  </label>
+  <button data-act="clear">保存データを消す</button>
+</div>
+<div id="saveBadge">未保存</div>
+
+<div class="staff"></div>
+<div class="wrap">
+
+  <!-- ===== はじめの画面 ===== -->
+  <section class="screen" id="screen-start">
+    <h1><small>BRASS BAND REUNION</small>イントロドン</h1>
+    <p class="muted">YouTube接続：<span id="ytStatus" class="status-warn">読み込み中…</span></p>
+    <div id="fileWarn" class="notice" style="display:none">
+      このページをPCのファイルとして直接開いています。この開き方だとYouTubeが再生できないことがあります（エラー153）。再生テストで確認してください。
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <span>曲セット：</span>
+        <select id="setSelect"></select>
+        <label class="filebtn">曲セットを読み込む
+          <input type="file" id="importSetInput" accept=".json,application/json">
+        </label>
+      </div>
+      <p class="muted" id="setInfo"></p>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <button class="primary" id="btnNew">新しく始める</button>
+        <button id="btnResume" disabled>続きから</button>
+        <label class="filebtn">状態を読み込む
+          <input type="file" id="importStateInput" accept=".json,application/json">
+        </label>
+      </div>
+      <p class="muted" id="resumeInfo">保存データはありません</p>
+    </div>
+
+    <div class="card">
+      <p style="margin-top:0">準備用（①の動作確認）</p>
+      <div class="row">
+        <button id="btnTest">再生テスト</button>
+        <button id="btnCheck">埋め込みチェック</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 再生テスト ===== -->
+  <section class="screen" id="screen-test">
+    <h2>再生テスト</h2>
+    <p class="muted">本番と同じく、映像を隠して音だけ流します。曲名が見えるのはこのテスト画面だけです。</p>
+    <div class="row" style="align-items:flex-start">
+      <div class="stage">
+        <div id="yt-player"></div>
+        <div class="cover" id="cover"><div class="note">♪</div><div>何の曲？</div></div>
+      </div>
+      <div style="flex:1;min-width:280px">
+        <p style="margin-top:0">選んでいる曲：<b id="testTitle">-</b></p>
+        <p class="muted">状態：<span id="playState">-</span></p>
+        <div class="row bigctl">
+          <button class="primary" id="btnPlay">▶ 最初から</button>
+          <button id="btnPause">❚❚ 一時停止</button>
+          <button id="btnResumePlay">▶ 続きから</button>
+        </div>
+        <div class="row" style="margin-top:14px">
+          <span>音量</span><input type="range" id="vol" min="0" max="100"><span id="volVal"></span>
+          <button id="btnCover">映像を見せる</button>
+        </div>
+        <p class="muted">キーボード：スペース＝一時停止／続きから、R＝最初から</p>
+        <p id="playError" class="status-ng"></p>
+      </div>
+    </div>
+    <div class="card">
+      <div>曲を選ぶ</div>
+      <div class="songlist" id="songList"></div>
+    </div>
+    <button id="btnTestBack">← はじめの画面へ</button>
+  </section>
+
+  <!-- ===== 埋め込みチェック ===== -->
+  <section class="screen" id="screen-check">
+    <h2>埋め込みチェック</h2>
+    <p class="muted">選んでいる曲セットの全曲を、音を消して1曲ずつ読み込み、アプリ内で再生できるか確かめます。</p>
+    <div class="row">
+      <button class="primary" id="btnCheckRun">チェック開始</button>
+      <span id="checkSummary" class="muted"></span>
+    </div>
+    <div class="card"><table>
+      <thead><tr><th>学年</th><th>曲名</th><th>結果</th></tr></thead>
+      <tbody id="checkBody"></tbody>
+    </table></div>
+    <button id="btnCheckBack">← はじめの画面へ</button>
+  </section>
+
+  <!-- ===== メンバー登録（②で作る） ===== -->
+  <section class="screen" id="screen-members">
+    <h2>メンバー登録</h2>
+    <div class="card">
+      <p>ここは②（中核ロジック）で作ります。</p>
+      <p class="muted">いまは「新しく始める」→ この画面 → 再読み込み → 「続きから」で、この画面に戻ってくるかを確認してください。</p>
+    </div>
+    <button id="btnMembersBack">← はじめの画面へ</button>
+  </section>
+
+</div>
+
+<div id="check-holder"><div id="check-player"></div></div>
+
+<script>
+'use strict';
+
+// =====================================================================
+//  曲セット（ここを書き換える／コピーして別パターンを作る）
+//  grade : 1 / 2 / 3（何年生のときの曲か）
+//  title : 曲名（答えとして表示）
+//  url   : YouTubeのURL（youtu.be / watch?v= / shorts どれでも可）
+//  start : 再生を始める秒数（省略すると0秒＝冒頭から）
+//  hint1 : ヒント1（作曲者など・省略可）
+//  hint2 : ヒント2（演奏した大会・行事など・省略可）
+// =====================================================================
+const SONG_SETS = [
+  {
+    id: 'sample',
+    name: 'サンプル（動作確認用）',
+    songs: [
+      { grade: 1, title: 'サンプル曲A（YouTube公式の見本動画）', url: 'https://www.youtube.com/watch?v=M7lc1UVf-VE', start: 0, hint1: '作曲者：〇〇', hint2: '〇年の定期演奏会' },
+      { grade: 2, title: 'サンプル曲B（10秒目から再生）', url: 'https://youtu.be/M7lc1UVf-VE?t=10', hint1: '', hint2: '' },
+      { grade: 3, title: 'サンプル曲C（わざとURLを空にした例）', url: '', hint1: '', hint2: '' }
+    ]
+  }
+];
+
+// ===== 保存に使う名前（変えると過去の保存データは読まれなくなる） =====
+const KEY_STATE = 'introdon_state_v1';
+const KEY_SETS  = 'introdon_sets_v1';
+
+const SCREEN_NAMES = { start: 'はじめの画面', test: '再生テスト', check: '埋め込みチェック', members: 'メンバー登録' };
+
+// YouTubeのエラー番号 → 日本語の説明
+const YT_ERRORS = {
+  2:   'URLが正しくありません',
+  5:   'このブラウザで再生できません',
+  100: '動画が削除されたか非公開です',
+  101: '埋め込み禁止（アプリ内では再生できません）',
+  150: '埋め込み禁止（アプリ内では再生できません）',
+  153: '置き場所の問題で再生できません（ファイルで直接開いている可能性）'
+};
+
+// ===== 状態（自動保存の対象） =====
+function newState(setId) {
+  return {
+    version: 1,
+    setId: setId || SONG_SETS[0].id,
+    screen: 'start',
+    testIndex: 0,     // 再生テストで選んでいる曲
+    volume: 80,
+    // ↓②で使う
+    members: [], teams: [], questions: [], current: 0, scores: {},
+    savedAt: null
+  };
+}
+let state = newState();
+let importedSets = [];
+
+// ===== 保存まわり（ブラウザに保存。使えない環境でも止まらないようにする） =====
+function saveState() {
+  state.savedAt = new Date().toISOString();
+  try {
+    localStorage.setItem(KEY_STATE, JSON.stringify(state));
+    setBadge('自動保存 ' + fmtTime(state.savedAt));
+  } catch (e) {
+    setBadge('ブラウザに保存できません（司会メニューの「書き出す」を使ってください）');
+  }
+}
+function loadSaved() {
+  try { const s = localStorage.getItem(KEY_STATE); return s ? JSON.parse(s) : null; }
+  catch (e) { return null; }
+}
+function clearSaved() {
+  try { localStorage.removeItem(KEY_STATE); } catch (e) {}
+}
+function loadImportedSets() {
+  try { const s = localStorage.getItem(KEY_SETS); importedSets = s ? JSON.parse(s) : []; }
+  catch (e) { importedSets = []; }
+}
+function saveImportedSets() {
+  try { localStorage.setItem(KEY_SETS, JSON.stringify(importedSets)); } catch (e) {}
+}
+function setBadge(t) { document.getElementById('saveBadge').textContent = t; }
+function fmtTime(iso) {
+  const d = new Date(iso);
+  return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+}
+
+// ===== 曲セットの取り出し =====
+function allSets() { return SONG_SETS.concat(importedSets); }
+function currentSet() { return allSets().find(s => s.id === state.setId) || allSets()[0]; }
+
+// YouTubeのURLから動画ID（11文字）を取り出す
+function parseVideoId(url) {
+  if (!url) return null;
+  url = String(url).trim();
+  if (/^[\w-]{11}$/.test(url)) return url;
+  try {
+    const u = new URL(url);
+    if (u.hostname.includes('youtu.be')) return u.pathname.slice(1, 12) || null;
+    if (u.searchParams.get('v')) return u.searchParams.get('v');
+    const m = u.pathname.match(/\/(embed|shorts|live)\/([\w-]{11})/);
+    if (m) return m[2];
+  } catch (e) {}
+  return null;
+}
+// 開始秒：曲セットの start が優先。なければURLの t= を読む（例 t=90 / t=1m30s）
+function songStart(song) {
+  if (typeof song.start === 'number') return song.start;
+  try {
+    const t = new URL(song.url).searchParams.get('t');
+    if (!t) return 0;
+    if (/^\d+$/.test(t)) return Number(t);
+    const m = t.match(/(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?/);
+    return (Number(m[1] || 0) * 3600) + (Number(m[2] || 0) * 60) + Number(m[3] || 0);
+  } catch (e) { return 0; }
+}
+
+// ===== 画面の切り替え =====
+function show(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  state.screen = name;
+  if (name === 'start') renderStart();
+  if (name === 'test') renderTest();
+  if (name === 'check') renderCheckTable();
+  if (name !== 'test') stopMain();
+  saveState();
+  window.scrollTo(0, 0);
+}
+
+// ===== はじめの画面 =====
+function renderStart() {
+  const sel = document.getElementById('setSelect');
+  sel.innerHTML = '';
+  allSets().forEach(s => {
+    const o = document.createElement('option');
+    o.value = s.id; o.textContent = s.name + '（' + s.songs.length + '曲）';
+    if (s.id === state.setId) o.selected = true;
+    sel.appendChild(o);
+  });
+  const set = currentSet();
+  const count = g => set.songs.filter(s => Number(s.grade) === g).length;
+  document.getElementById('setInfo').textContent =
+    '1年：' + count(1) + '曲　2年：' + count(2) + '曲　3年：' + count(3) + '曲';
+
+  const saved = loadSaved();
+  const btn = document.getElementById('btnResume');
+  if (saved && saved.screen && saved.screen !== 'start') {
+    btn.disabled = false;
+    document.getElementById('resumeInfo').textContent =
+      '前回の保存：' + fmtTime(saved.savedAt) + '（' + (SCREEN_NAMES[saved.screen] || saved.screen) + '）';
+  } else {
+    btn.disabled = true;
+    document.getElementById('resumeInfo').textContent = '保存データはありません';
+  }
+  document.getElementById('fileWarn').style.display = location.protocol === 'file:' ? 'block' : 'none';
+}
+
+// ===== YouTube（本番用プレーヤー） =====
+let ytApiReady = false, player = null, playerReady = false, coverOn = true;
+
+window.onYouTubeIframeAPIReady = function () {
+  ytApiReady = true;
+  setYtStatus('つながりました', 'status-ok');
+  player = new YT.Player('yt-player', {
+    width: '100%', height: '100%',
+    playerVars: { controls: 0, disablekb: 1, rel: 0, playsinline: 1, iv_load_policy: 3, fs: 0 },
+    events: {
+      onReady: () => { playerReady = true; player.setVolume(state.volume); },
+      onStateChange: e => {
+        const map = { '-1': '準備中', 0: '終わりました', 1: '再生中', 2: '一時停止', 3: '読み込み中', 5: '待機中' };
+        document.getElementById('playState').textContent = map[e.data] || '-';
+        if (e.data === 1) document.getElementById('playError').textContent = '';
+      },
+      onError: e => {
+        document.getElementById('playError').textContent =
+          'エラー ' + e.data + '：' + (YT_ERRORS[e.data] || '再生できませんでした');
+      }
+    }
+  });
+};
+function setYtStatus(text, cls) {
+  const el = document.getElementById('ytStatus');
+  el.textContent = text; el.className = cls;
+}
+(function loadYtApi() {
+  const tag = document.createElement('script');
+  tag.src = 'https://www.youtube.com/iframe_api';
+  tag.onerror = () => setYtStatus('つながりません（ネット接続を確認）', 'status-ng');
+  document.head.appendChild(tag);
+  setTimeout(() => { if (!ytApiReady) setYtStatus('つながりません（ネット接続を確認）', 'status-ng'); }, 12000);
+})();
+
+function testSong() { return currentSet().songs[state.testIndex] || currentSet().songs[0]; }
+
+function playFromStart() {
+  const err = document.getElementById('playError');
+  if (!playerReady) { err.textContent = 'YouTubeの準備がまだです。少し待ってください。'; return; }
+  const song = testSong();
+  const id = parseVideoId(song && song.url);
+  if (!id) { err.textContent = 'この曲のURLが読めません（曲セットを確認）'; return; }
+  err.textContent = '';
+  player.setVolume(state.volume);
+  player.loadVideoById({ videoId: id, startSeconds: songStart(song) });
+}
+function pauseMain()  { if (playerReady) player.pauseVideo(); }
+function resumeMain() { if (playerReady) player.playVideo(); }
+function stopMain()   { if (playerReady) { try { player.stopVideo(); } catch (e) {} } }
+function togglePlay() {
+  if (!playerReady) return;
+  const st = player.getPlayerState();
+  if (st === 1) pauseMain();
+  else if (st === 2) resumeMain();
+  else playFromStart();
+}
+
+// ===== 再生テスト画面 =====
+function renderTest() {
+  const list = document.getElementById('songList');
+  list.innerHTML = '';
+  currentSet().songs.forEach((s, i) => {
+    const b = document.createElement('button');
+    b.textContent = s.grade + '年　' + (s.title || '（曲名なし）');
+    if (i === state.testIndex) b.classList.add('sel');
+    b.onclick = () => { stopMain(); state.testIndex = i; saveState(); renderTest(); };
+    list.appendChild(b);
+  });
+  const song = testSong();
+  document.getElementById('testTitle').textContent = song ? song.title : '-';
+  document.getElementById('vol').value = state.volume;
+  document.getElementById('volVal').textContent = state.volume;
+}
+
+// ===== 埋め込みチェック（画面の外の小さなプレーヤーで1曲ずつ試す） =====
+let checker = null, checkerReady = false, checkQueue = [], checkCur = null, checkTimer = null, checkResults = {};
+
+function renderCheckTable() {
+  const body = document.getElementById('checkBody');
+  body.innerHTML = '';
+  currentSet().songs.forEach((s, i) => {
+    const r = checkResults[i];
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + esc(s.grade) + '年</td><td>' + esc(s.title || '（曲名なし）') + '</td>' +
+      '<td class="' + (r ? r.cls : 'muted') + '">' + (r ? esc(r.msg) : '未確認') + '</td>';
+    body.appendChild(tr);
+  });
+  const vals = Object.values(checkResults);
+  document.getElementById('checkSummary').textContent = vals.length
+    ? 'OK ' + vals.filter(v => v.cls === 'status-ok').length + '曲／要対応 ' + vals.filter(v => v.cls !== 'status-ok').length + '曲'
+    : '';
+}
+function startCheck() {
+  if (!ytApiReady) { alert('YouTubeにつながっていません。ネット接続を確認してください。'); return; }
+  checkResults = {};
+  checkQueue = currentSet().songs.map((_, i) => i);
+  renderCheckTable();
+  document.getElementById('btnCheckRun').disabled = true;
+  if (!checker) {
+    checker = new YT.Player('check-player', {
+      width: 320, height: 180,
+      playerVars: { controls: 0, playsinline: 1, mute: 1 },
+      events: {
+        onReady: () => { checkerReady = true; checkNext(); },
+        onStateChange: e => { if (e.data === 1) checkFinish('status-ok', 'OK（再生できます）'); },
+        onError: e => checkFinish('status-ng', 'エラー ' + e.data + '：' + (YT_ERRORS[e.data] || '再生できません'))
+      }
+    });
+  } else if (checkerReady) {
+    checkNext();
+  }
+}
+function checkNext() {
+  if (!checkQueue.length) {
+    document.getElementById('btnCheckRun').disabled = false;
+    renderCheckTable();
+    return;
+  }
+  const i = checkQueue.shift();
+  const song = currentSet().songs[i];
+  const id = parseVideoId(song.url);
+  if (!id) { checkResults[i] = { cls: 'status-ng', msg: 'URLが読めません' }; renderCheckTable(); return checkNext(); }
+  checkCur = i;
+  checkResults[i] = { cls: 'status-warn', msg: '確認中…' };
+  renderCheckTable();
+  checker.mute();
+  checker.loadVideoById({ videoId: id, startSeconds: songStart(song) });
+  checkTimer = setTimeout(() => checkFinish('status-warn', '時間切れ（通信が遅い可能性。もう一度試してください）'), 15000);
+}
+function checkFinish(cls, msg) {
+  if (checkCur === null) return;   // 二重に結果が来たときは無視
+  clearTimeout(checkTimer);
+  checkResults[checkCur] = { cls, msg };
+  checkCur = null;
+  try { checker.stopVideo(); } catch (e) {}
+  renderCheckTable();
+  setTimeout(checkNext, 300);
+}
+
+// ===== ファイルの書き出し・読み込み =====
+function exportState() {
+  saveState();
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const d = new Date();
+  const name = 'introdon_save_' + d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0') +
+    '_' + String(d.getHours()).padStart(2, '0') + String(d.getMinutes()).padStart(2, '0') + '.json';
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+function readJsonFile(file, cb) {
+  const r = new FileReader();
+  r.onload = () => {
+    try { cb(JSON.parse(r.result)); }
+    catch (e) { alert('ファイルの中身が読めませんでした（JSON形式か確認してください）'); }
+  };
+  r.readAsText(file, 'utf-8');
+}
+function importState(file) {
+  readJsonFile(file, obj => {
+    if (!obj || obj.version !== 1 || !obj.screen) { alert('このアプリの保存ファイルではないようです'); return; }
+    state = Object.assign(newState(), obj);
+    if (!allSets().some(s => s.id === state.setId)) alert('保存ファイルの曲セットが見つかりません。先に同じ曲セットを読み込んでください。');
+    show(state.screen);
+  });
+}
+function importSet(file) {
+  readJsonFile(file, obj => {
+    if (!obj || !Array.isArray(obj.songs)) { alert('曲セットの形になっていません（songs の一覧が必要です）'); return; }
+    const set = { id: 'import_' + Date.now(), name: obj.name || file.name.replace(/\.json$/, ''), songs: obj.songs };
+    importedSets.push(set);
+    saveImportedSets();
+    state.setId = set.id;
+    saveState();
+    renderStart();
+    alert('「' + set.name + '」を読み込みました（' + set.songs.length + '曲）');
+  });
+}
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// ===== ボタンとキーボードのつなぎこみ =====
+document.getElementById('setSelect').onchange = e => { state.setId = e.target.value; checkResults = {}; saveState(); renderStart(); };
+document.getElementById('importSetInput').onchange = e => { if (e.target.files[0]) importSet(e.target.files[0]); e.target.value = ''; };
+document.getElementById('importStateInput').onchange = e => { if (e.target.files[0]) importState(e.target.files[0]); e.target.value = ''; };
+document.getElementById('importStateInput2').onchange = e => { if (e.target.files[0]) importState(e.target.files[0]); e.target.value = ''; closeMenu(); };
+
+document.getElementById('btnNew').onclick = () => {
+  const saved = loadSaved();
+  if (saved && saved.screen !== 'start' && !confirm('前回の続きのデータは消えます。新しく始めますか？')) return;
+  const keepSet = state.setId, keepVol = state.volume;
+  state = newState(keepSet); state.volume = keepVol;
+  show('members');
+};
+document.getElementById('btnResume').onclick = () => {
+  const saved = loadSaved();
+  if (!saved) return;
+  state = Object.assign(newState(), saved);
+  show(state.screen);
+};
+document.getElementById('btnTest').onclick = () => show('test');
+document.getElementById('btnCheck').onclick = () => show('check');
+document.getElementById('btnTestBack').onclick = () => show('start');
+document.getElementById('btnCheckBack').onclick = () => show('start');
+document.getElementById('btnMembersBack').onclick = () => show('start');
+document.getElementById('btnCheckRun').onclick = startCheck;
+
+document.getElementById('btnPlay').onclick = playFromStart;
+document.getElementById('btnPause').onclick = pauseMain;
+document.getElementById('btnResumePlay').onclick = resumeMain;
+document.getElementById('vol').oninput = e => {
+  state.volume = Number(e.target.value);
+  document.getElementById('volVal').textContent = state.volume;
+  if (playerReady) player.setVolume(state.volume);
+};
+document.getElementById('vol').onchange = saveState;
+document.getElementById('btnCover').onclick = () => {
+  coverOn = !coverOn;
+  document.getElementById('cover').classList.toggle('hide', !coverOn);
+  document.getElementById('btnCover').textContent = coverOn ? '映像を見せる' : '映像を隠す';
+};
+
+document.addEventListener('keydown', e => {
+  if (state.screen !== 'test') return;
+  if (['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+  if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+  if (e.key === 'r' || e.key === 'R') playFromStart();
+});
+
+// 司会メニュー
+function closeMenu() { document.getElementById('menuPanel').classList.remove('open'); }
+document.getElementById('menuBtn').onclick = () => document.getElementById('menuPanel').classList.toggle('open');
+document.getElementById('menuPanel').addEventListener('click', e => {
+  const act = e.target.dataset && e.target.dataset.act;
+  if (!act) return;
+  if (act === 'home') show('start');
+  if (act === 'export') exportState();
+  if (act === 'clear' && confirm('ブラウザに保存した進行データを消しますか？（曲セットは消えません）')) {
+    clearSaved(); setBadge('保存データを消しました'); renderStart();
+  }
+  closeMenu();
+});
+
+// ===== 起動 =====
+loadImportedSets();
+(function boot() {
+  const saved = loadSaved();
+  if (saved) { state.setId = saved.setId || state.setId; state.volume = saved.volume || state.volume; }
+  if (!allSets().some(s => s.id === state.setId)) state.setId = SONG_SETS[0].id;
+  // 起動時は必ず「はじめの画面」。続きは「続きから」ボタンで戻る（保存データは上書きしない）
+  document.getElementById('screen-start').classList.add('active');
+  renderStart();
+})();
+</script>
+</body>
+</html>
