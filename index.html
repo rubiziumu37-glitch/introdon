@@ -161,23 +161,63 @@
   .intro-dots i.on{background:var(--gold)}
   .intro-ctl{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
 
+  /* ===== わかりやすさのための部品 ===== */
+  .menu-sec{font-size:12px;color:var(--gold);letter-spacing:.15em;margin-top:6px;border-top:1px solid var(--gold-soft);padding-top:6px}
+  .menu-sec:first-child{border-top:none;margin-top:0;padding-top:0}
+  .hero{text-align:center;padding:40px 0 20px}
+  .hero h1{font-size:64px}
+  .lead{font-size:22px;color:var(--muted);margin:8px 0 34px}
+  button.big{font-size:28px;padding:20px 56px;border-radius:16px;box-shadow:0 6px 24px rgba(212,175,90,.25)}
+  .resume-card{max-width:560px;margin:0 auto 26px;padding:20px;border:2px solid var(--gold);border-radius:16px;background:rgba(22,38,74,.85)}
+  .resume-what{font-size:22px;margin:6px 0 16px}
+  .resume-card + button.big{font-size:18px;padding:12px 28px;background:var(--navy2);color:var(--ink);box-shadow:none;font-weight:normal}
+  .stepper{display:none;justify-content:center;gap:4px;flex-wrap:wrap;padding:0 16px;margin:-4px 0 4px}
+  .stepper.show{display:flex}
+  .stepper .st{display:flex;align-items:center;gap:6px;font-size:15px;color:var(--muted);padding:6px 10px}
+  .stepper .st b{display:inline-flex;width:26px;height:26px;border-radius:50%;align-items:center;justify-content:center;border:1px solid var(--muted);font-size:14px}
+  .stepper .st.done{color:var(--ink)} .stepper .st.done b{background:var(--navy3);border-color:var(--gold)}
+  .stepper .st.now{color:var(--gold);font-weight:bold} .stepper .st.now b{background:var(--gold);color:var(--navy);border-color:var(--gold)}
+  .stepper .sep{color:var(--gold-soft);align-self:center}
+  .howto{font-size:18px;margin:-6px 0 14px;padding:10px 14px;border-radius:10px;background:rgba(212,175,90,.08);border-left:4px solid var(--gold)}
+  .nav{display:flex;justify-content:space-between;gap:12px;margin-top:18px}
+  .nav button.primary{font-size:20px;padding:14px 28px}
+  .reason{color:var(--warn);text-align:right;min-height:1.4em;margin:6px 0}
+  .set-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+  .set-card{text-align:left;padding:16px 18px;border-radius:14px;border:2px solid var(--gold-soft);background:rgba(22,38,74,.78)}
+  .set-card.sel{border-color:var(--gold);box-shadow:0 0 0 3px rgba(212,175,90,.25)}
+  .set-card .nm{font-size:20px;font-weight:bold}
+  .set-card .ct{font-size:15px;color:var(--muted);margin-top:6px}
+  .set-card .wn{font-size:14px;color:var(--warn);margin-top:6px}
+  .set-card .mark{float:right;color:var(--gold);font-size:20px}
+  .linkbtn{color:var(--gold);text-decoration:underline;cursor:pointer}
+  .linkbtn input{display:none}
+
   /* 紙吹雪 */
   #confetti{position:fixed;inset:0;pointer-events:none;z-index:80}
 </style>
 </head>
 <body>
 
-<button id="menuBtn">≡ 司会メニュー</button>
+<button id="menuBtn">⚙ 準備・設定</button>
 <div id="menuPanel">
-  <button data-act="home">はじめの画面へ</button>
-  <button data-act="score" class="game-only">得点を修正する</button>
-  <button data-act="jump" class="game-only">◯問目へ移動する</button>
-  <button data-act="sfx" id="menuSfx">効果音：オン</button>
-  <button data-act="export">状態を書き出す（ファイル保存）</button>
-  <label class="filebtn">状態を読み込む
+  <div class="menu-sec game-only">ゲーム中の調整</div>
+  <button data-act="score" class="game-only">得点を直す</button>
+  <button data-act="jump" class="game-only">ほかの問題へ移る</button>
+  <div class="menu-sec">準備</div>
+  <button data-act="test">曲を試しに流す</button>
+  <button data-act="check">曲リストが全部流れるか確認</button>
+  <label class="filebtn">曲リストのファイルを読み込む
+    <input type="file" id="importSetInput2" accept=".json,application/json">
+  </label>
+  <div class="menu-sec">もしものとき</div>
+  <button data-act="export">進み具合をファイルに保存</button>
+  <label class="filebtn">保存したファイルから再開
     <input type="file" id="importStateInput2" accept=".json,application/json">
   </label>
-  <button data-act="clear">保存データを消す</button>
+  <button data-act="sfx" id="menuSfx">効果音：オン</button>
+  <button data-act="clear">ブラウザの記録を消す</button>
+  <div class="menu-sec"></div>
+  <button data-act="home">最初の画面にもどる</button>
 </div>
 <div id="saveBadge">未保存</div>
 
@@ -201,57 +241,50 @@
 </div></div>
 
 <div class="staff"></div>
+<div class="stepper" id="stepper"></div>
 <div class="wrap">
 
-  <!-- ===== はじめの画面 ===== -->
+  <!-- ===== 最初の画面 ===== -->
   <section class="screen" id="screen-start">
-    <h1><small>BRASS BAND REUNION</small>イントロドン</h1>
-    <p class="muted">YouTube接続：<span id="ytStatus" class="status-warn">読み込み中…</span></p>
-    <div id="fileWarn" class="notice" style="display:none">
-      このページをPCのファイルとして直接開いています。この開き方だとYouTubeが再生できないことがあります（エラー153）。
-    </div>
-    <div class="card">
-      <div class="row">
-        <span>曲セット：</span>
-        <select id="setSelect" style="min-width:300px"></select>
-        <label class="filebtn">曲セットを読み込む
-          <input type="file" id="importSetInput" accept=".json,application/json">
-        </label>
+    <div class="hero">
+      <h1><small>BRASS BAND REUNION</small>イントロドン</h1>
+      <p class="lead">あの頃の曲、イントロで当てられる？</p>
+      <div id="resumeCard" class="resume-card" style="display:none">
+        <div class="muted">前回の続き</div>
+        <div class="resume-what" id="resumeWhat"></div>
+        <button class="primary big" id="btnResume">続きから再開する</button>
       </div>
-      <p class="muted" id="setInfo"></p>
-    </div>
-    <div class="card">
-      <div class="row">
-        <button class="primary" id="btnNew">新しく始める</button>
-        <button id="btnResume" disabled>続きから</button>
-        <label class="filebtn">状態を読み込む
-          <input type="file" id="importStateInput" accept=".json,application/json">
-        </label>
-      </div>
-      <p class="muted" id="resumeInfo">保存データはありません</p>
-    </div>
-    <div class="card">
-      <p style="margin-top:0">準備用</p>
-      <div class="row">
-        <button id="btnTest">再生テスト</button>
-        <button id="btnCheck">埋め込みチェック</button>
+      <button class="primary big" id="btnNew">ゲームをはじめる</button>
+      <p class="muted" id="newNote"></p>
+      <p id="ytLine" class="muted">YouTube：<span id="ytStatus" class="status-warn">接続中…</span></p>
+      <div id="fileWarn" class="notice" style="display:none;text-align:left">
+        このページをPCのファイルとして直接開いています。この開き方だとYouTubeが流れないことがあります。ネット上のURLから開いてください。
       </div>
     </div>
   </section>
 
-  <!-- ===== メンバー登録 ===== -->
-  <section class="screen" id="screen-members">
-    <h2>メンバー登録</h2>
-    <div class="card">
-      <div class="row">
-        <span>チームの数：</span>
-        <select id="teamCount"></select>
-      </div>
-      <div class="row" id="teamNames" style="margin-top:12px"></div>
+  <!-- ===== ① 曲リストをえらぶ ===== -->
+  <section class="screen" id="screen-songs">
+    <h2>どの曲リストで遊びますか？</h2>
+    <p class="howto">使う曲リストを1つ選んで「次へ」を押してください。</p>
+    <div class="set-cards" id="setCards"></div>
+    <p class="muted">ほかの人が作った曲リストのファイルがあるときは
+      <label class="linkbtn">ここから読み込む<input type="file" id="importSetInput" accept=".json,application/json"></label>
+    </p>
+    <div class="nav">
+      <button id="btnSongsBack">← もどる</button>
+      <button class="primary" id="btnSongsNext">次へ（メンバー）→</button>
     </div>
+    <p class="reason" id="songsReason"></p>
+  </section>
+
+  <!-- ===== ② メンバー登録 ===== -->
+  <section class="screen" id="screen-members">
+    <h2>参加する人を入れてください</h2>
+    <p class="howto">名前とパートを1人ずつ入れます。LINEなどの名簿を貼り付けるなら「まとめて入力」が便利です。</p>
     <div class="card">
       <div class="row" style="justify-content:space-between">
-        <span>メンバー（<span id="memberCount">0</span>人／最大17人程度）</span>
+        <span>メンバー（<span id="memberCount">0</span>人）</span>
         <div class="row">
           <button class="small" id="btnAddMember">＋ 1人追加</button>
           <button class="small" id="btnBulkToggle">まとめて入力</button>
@@ -273,28 +306,36 @@
         <option value="ユーフォニアム"><option value="チューバ"><option value="コントラバス"><option value="パーカッション">
       </datalist>
     </div>
-    <div class="row">
-      <button id="btnMembersBack">← はじめの画面へ</button>
-      <button class="primary" id="btnToTeams">チーム分けへ →</button>
+    <div class="nav">
+      <button id="btnMembersBack">← もどる</button>
+      <button class="primary" id="btnToTeams">次へ（チーム分け）→</button>
     </div>
-    <p class="status-ng" id="memberError"></p>
+    <p class="reason" id="memberError"></p>
   </section>
 
-  <!-- ===== チーム分け ===== -->
+  <!-- ===== ③ チーム分け ===== -->
   <section class="screen" id="screen-teams">
-    <h2>チーム分け</h2>
+    <h2>チームに分けてください</h2>
+    <p class="howto">チームの数を決めて「ランダムに分ける」を押すだけでOKです。手で分けるときは、名前の横のリストでチームを選びます。</p>
+    <div class="card">
+      <div class="row">
+        <span>チームの数</span>
+        <select id="teamCount"></select>
+        <span class="muted">チーム名は下の欄で変えられます</span>
+      </div>
+      <div class="row" id="teamNames" style="margin-top:12px"></div>
+    </div>
     <div class="row">
-      <button class="primary" id="btnRandomTeams">ランダムに分ける</button>
-      <span class="muted">手で分けるときは、各メンバーの右のリストでチームを選びます。</span>
+      <button class="primary" id="btnRandomTeams">🎲 ランダムに分ける</button>
     </div>
     <div class="card">
       <div class="teams" id="teamCols"></div>
     </div>
-    <div class="row">
-      <button id="btnTeamsBack">← メンバー登録へ</button>
-      <button class="primary" id="btnStartGame">メンバー紹介へ →</button>
+    <div class="nav">
+      <button id="btnTeamsBack">← もどる</button>
+      <button class="primary" id="btnStartGame">次へ（メンバー紹介）→</button>
     </div>
-    <p class="status-ng" id="teamError"></p>
+    <p class="reason" id="teamError"></p>
   </section>
 
   <!-- ===== メンバー紹介 ===== -->
@@ -360,7 +401,7 @@
 
   <!-- ===== 再生テスト ===== -->
   <section class="screen" id="screen-test">
-    <h2>再生テスト</h2>
+    <h2>曲を試しに流す</h2>
     <p class="muted">本番と同じく、映像を隠して音だけ流します。曲名が見えるのはこのテスト画面だけです。</p>
     <div class="row" style="align-items:flex-start">
       <div class="stage" style="width:480px;max-width:100%">
@@ -386,13 +427,13 @@
       <div>曲を選ぶ</div>
       <div class="songlist" id="songList"></div>
     </div>
-    <button id="btnTestBack">← はじめの画面へ</button>
+    <button id="btnTestBack">← もどる</button>
   </section>
 
   <!-- ===== 埋め込みチェック ===== -->
   <section class="screen" id="screen-check">
-    <h2>埋め込みチェック</h2>
-    <p class="muted">選んでいる曲セットの全曲を、音を消して1曲ずつ読み込み、アプリ内で再生できるか確かめます。</p>
+    <h2>曲リストが全部流れるか確認</h2>
+    <p class="muted">選んでいる曲リストの全曲を、音を消して1曲ずつ読み込み、このアプリの中で流せるかを確かめます。「埋め込み禁止」と出た曲は、YouTubeで別の動画を探して差し替えてください。</p>
     <div class="row">
       <button class="primary" id="btnCheckRun">チェック開始</button>
       <span id="checkSummary" class="muted"></span>
@@ -401,7 +442,7 @@
       <thead><tr><th>学年</th><th>曲名</th><th>結果</th></tr></thead>
       <tbody id="checkBody"></tbody>
     </table></div>
-    <button id="btnCheckBack">← はじめの画面へ</button>
+    <button id="btnCheckBack">← もどる</button>
   </section>
 
 </div>
@@ -413,7 +454,7 @@
 'use strict';
 
 // =====================================================================
-//  曲セット（ここを書き換える／コピーして別パターンを作る）
+//  曲リスト（ここを書き換える／コピーして別パターンを作る）
 //  1年・2年・3年から3曲ずつ出題し、残りの曲からアンコール3問を抽選します。
 //  → 各学年3曲＋アンコール用3曲以上、合計12曲以上を入れてください。
 //
@@ -460,7 +501,7 @@ const ROUND_LABELS = { 1: '第1楽章　1年の曲', 2: '第2楽章　2年の曲
 // ===== 保存に使う名前（変えると過去の保存データは読まれなくなる） =====
 const KEY_STATE = 'introdon_state_v1';
 const KEY_SETS  = 'introdon_sets_v1';
-const SCREEN_NAMES = { start: 'はじめの画面', test: '再生テスト', check: '埋め込みチェック', members: 'メンバー登録', teams: 'チーム分け', intro: 'メンバー紹介', game: 'ゲーム', result: '結果発表' };
+const SCREEN_NAMES = { start: '最初の画面', songs: '曲リストえらび', test: '曲の試し流し', check: '曲の確認', members: 'メンバー登録', teams: 'チーム分け', intro: 'メンバー紹介', game: 'ゲーム', result: '結果発表' };
 
 const YT_ERRORS = {
   2: 'URLが正しくありません', 5: 'このブラウザで再生できません', 100: '動画が削除されたか非公開です',
@@ -523,7 +564,7 @@ function shuffle(a) {
   return b;
 }
 
-// ===== 曲セット =====
+// ===== 曲リスト =====
 function allSets() { return SONG_SETS.concat(importedSets); }
 function currentSet() { return allSets().find(s => s.id === state.setId) || allSets()[0]; }
 function parseVideoId(url) {
@@ -551,7 +592,10 @@ function songStart(song) {
 }
 
 // ===== 画面の切り替え =====
+let prevScreen = 'start';   // 「もどる」で戻る先（準備用の画面から元の画面へ）
+const STEPS = [['songs', '曲'], ['members', 'メンバー'], ['teams', 'チーム'], ['intro', '紹介'], ['game', 'ゲーム']];
 function show(name) {
+  if (state.screen && state.screen !== name && !['test', 'check'].includes(state.screen)) prevScreen = state.screen;
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   $('screen-' + name).classList.add('active');
   state.screen = name;
@@ -559,6 +603,7 @@ function show(name) {
   if (name !== 'game') gameP.stop();
   if (name !== 'intro') stopIntroAuto();
   if (name === 'start') renderStart();
+  if (name === 'songs') renderSongs();
   if (name === 'intro') renderIntro();
   if (name === 'members') renderMembers();
   if (name === 'teams') renderTeams();
@@ -567,45 +612,115 @@ function show(name) {
   if (name === 'test') renderTest();
   if (name === 'check') renderCheckTable();
   document.querySelectorAll('.game-only').forEach(b => b.style.display = name === 'game' ? '' : 'none');
+  renderStepper(name);
   saveState();
   window.scrollTo(0, 0);
 }
-
-// ===== はじめの画面 =====
-function renderStart() {
-  const sel = $('setSelect');
-  sel.innerHTML = '';
-  allSets().forEach(s => {
-    const o = document.createElement('option');
-    o.value = s.id; o.textContent = s.name + '（' + s.songs.length + '曲）';
-    if (s.id === state.setId) o.selected = true;
-    sel.appendChild(o);
-  });
-  const set = currentSet();
-  const count = g => set.songs.filter(s => Number(s.grade) === g).length;
-  const need = RULES.perGrade * 3 + RULES.encoreCount;
-  let info = '1年：' + count(1) + '曲　2年：' + count(2) + '曲　3年：' + count(3) + '曲';
-  const lack = [1, 2, 3].filter(g => count(g) < RULES.perGrade);
-  if (lack.length) info += '　⚠ ' + lack.join('・') + '年の曲が' + RULES.perGrade + '曲未満です';
-  else if (set.songs.length < need) info += '　⚠ アンコール用の曲が足りません（合計' + need + '曲以上必要）';
-  $('setInfo').textContent = info;
-
-  const saved = loadSaved();
-  const btn = $('btnResume');
-  if (saved && saved.screen && saved.screen !== 'start') {
-    btn.disabled = false;
-    let where = SCREEN_NAMES[saved.screen] || saved.screen;
-    if (saved.screen === 'game') where += ' 第' + (saved.current + 1) + '問';
-    $('resumeInfo').textContent = '前回の保存：' + fmtTime(saved.savedAt) + '（' + where + '）';
-  } else {
-    btn.disabled = true;
-    $('resumeInfo').textContent = '保存データはありません';
-  }
-  $('fileWarn').style.display = location.protocol === 'file:' ? 'block' : 'none';
+// 準備の流れの帯（プロジェクターに映す紹介・ゲーム中は出さない）
+function renderStepper(name) {
+  const el = $('stepper');
+  const idx = STEPS.findIndex(s => s[0] === name);
+  if (!['songs', 'members', 'teams'].includes(name)) { el.classList.remove('show'); return; }
+  el.classList.add('show');
+  el.innerHTML = STEPS.map((s, i) =>
+    '<span class="st ' + (i < idx ? 'done' : i === idx ? 'now' : '') + '"><b>' + (i < idx ? '✓' : i + 1) + '</b>' + s[1] + '</span>'
+  ).join('<span class="sep">›</span>');
 }
 
-// ===== メンバー登録 =====
+// ===== 最初の画面 =====
+function renderStart() {
+  const saved = loadSaved();
+  const can = saved && saved.screen && !['start', 'test', 'check'].includes(saved.screen);
+  $('resumeCard').style.display = can ? 'block' : 'none';
+  if (can) $('resumeWhat').textContent = resumeSummary(saved);
+  $('btnNew').textContent = can ? '最初からはじめる' : 'ゲームをはじめる';
+  $('newNote').textContent = can ? '最初からはじめると、前回の続きは消えます' : '';
+  $('fileWarn').style.display = location.protocol === 'file:' ? 'block' : 'none';
+}
+// 前回どこまで進んだかを、ひと目でわかる言葉にする
+function resumeSummary(s) {
+  if (s.screen === 'game' || s.screen === 'result') {
+    const scores = (s.teamNames || []).map((nm, t) => ({ nm, sc: (s.scores || [])[t] || 0 })).sort((a, b) => b.sc - a.sc);
+    let lead = '';
+    if (scores.length) lead = (scores[1] && scores[0].sc === scores[1].sc) ? 'トップが同点で並んでいます' : scores[0].nm + 'が' + scores[0].sc + '点でトップ';
+    if (s.screen === 'result') return '結果発表まで終わっています（' + lead + '）';
+    return '第' + (s.current + 1) + '問／全' + (s.questions || []).length + '問　' + lead;
+  }
+  return (SCREEN_NAMES[s.screen] || '準備') + 'の途中（' + fmtTime(s.savedAt) + ' に保存）';
+}
+
+// ===== ① 曲リストをえらぶ =====
+function setStatus(set) {
+  const count = g => set.songs.filter(s => Number(s.grade) === g).length;
+  const counts = '1年 ' + count(1) + '曲・2年 ' + count(2) + '曲・3年 ' + count(3) + '曲（全' + set.songs.length + '曲）';
+  const need = RULES.perGrade * 3 + RULES.encoreCount;
+  const lack = [1, 2, 3].filter(g => count(g) < RULES.perGrade);
+  if (!set.songs.length) return { counts, warn: '曲が1曲も入っていません', block: true };
+  if (lack.length) return { counts, warn: lack.join('・') + '年の曲が' + RULES.perGrade + '曲より少ないので、問題数が減ります' };
+  if (set.songs.length < need) return { counts, warn: 'アンコール用の曲が足りないので、問題数が減ります（全' + need + '曲あると' + need + '問になります）' };
+  return { counts, warn: '' };
+}
+function renderSongs() {
+  const box = $('setCards');
+  box.innerHTML = '';
+  allSets().forEach(s => {
+    const st = setStatus(s);
+    const sel = s.id === state.setId;
+    const b = document.createElement('button');
+    b.className = 'set-card' + (sel ? ' sel' : '');
+    b.innerHTML = '<span class="mark">' + (sel ? '✓ 選択中' : '') + '</span><div class="nm">' + esc(s.name) + '</div>' +
+      '<div class="ct">' + esc(st.counts) + '</div>' + (st.warn ? '<div class="wn">⚠ ' + esc(st.warn) + '</div>' : '');
+    b.onclick = () => { state.setId = s.id; checkResults = {}; saveState(); renderSongs(); };
+    box.appendChild(b);
+  });
+  const st = setStatus(currentSet());
+  $('btnSongsNext').disabled = !!st.block;
+  $('songsReason').textContent = st.block ? 'この曲リストでは遊べません。ほかの曲リストを選んでください。' : '';
+}
+
+// ===== ② メンバー登録 =====
+function filledMembers() { return state.members.filter(m => (m.name || '').trim()); }
 function renderMembers() {
+  if (!state.members.length) for (let k = 0; k < 3; k++) state.members.push({ name: '', part: '', team: null });
+  const body = $('memberBody');
+  body.innerHTML = '';
+  state.members.forEach((m, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td><input type="text" data-k="name" value="' + esc(m.name) + '" placeholder="名前"></td>' +
+      '<td><input type="text" data-k="part" list="partList" value="' + esc(m.part) + '" placeholder="パート（候補から選べます）"></td>' +
+      '<td><button class="small" data-del>削除</button></td>';
+    tr.querySelectorAll('input').forEach(inp => {
+      inp.oninput = () => { m[inp.dataset.k] = inp.value; updateMembersNav(); };
+      inp.onchange = saveState;
+    });
+    tr.querySelector('[data-del]').onclick = () => { state.members.splice(i, 1); saveState(); renderMembers(); };
+    body.appendChild(tr);
+  });
+  updateMembersNav();
+}
+function updateMembersNav() {
+  const n = filledMembers().length;
+  $('memberCount').textContent = n;
+  $('btnToTeams').disabled = n < 2;
+  $('memberError').textContent = n < 2 ? 'あと' + (2 - n) + '人、名前を入れると次へ進めます' : '';
+}
+function addBulk() {
+  const lines = $('bulkText').value.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+  // 空の行は先に取り除いてから追加する
+  state.members = state.members.filter(m => (m.name || '').trim() || (m.part || '').trim());
+  lines.forEach(line => {
+    const parts = line.split(/[\s,、，\t]+/).filter(Boolean);
+    const part = parts.length > 1 ? parts.pop() : '';
+    state.members.push({ name: parts.join(' '), part, team: null });
+  });
+  $('bulkText').value = '';
+  $('bulkBox').style.display = 'none';
+  saveState(); renderMembers();
+}
+
+// ===== ③ チーム分け =====
+function renderTeams() { renderTeamSettings(); renderTeamCols(); }
+function renderTeamSettings() {
   const tc = $('teamCount');
   tc.innerHTML = '';
   for (let n = 2; n <= RULES.maxTeams; n++) {
@@ -620,48 +735,12 @@ function renderMembers() {
     const inp = document.createElement('input');
     inp.type = 'text'; inp.value = nm; inp.style.borderLeft = '6px solid ' + TEAM_COLORS[i];
     inp.style.width = '160px';
-    inp.oninput = () => { state.teamNames[i] = inp.value; };
+    inp.oninput = () => { state.teamNames[i] = inp.value; renderTeamCols(); };
     inp.onchange = saveState;
     box.appendChild(inp);
   });
-  const body = $('memberBody');
-  body.innerHTML = '';
-  state.members.forEach((m, i) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = '<td><input type="text" data-k="name" value="' + esc(m.name) + '" placeholder="名前"></td>' +
-      '<td><input type="text" data-k="part" list="partList" value="' + esc(m.part) + '" placeholder="パート"></td>' +
-      '<td><button class="small" data-del>削除</button></td>';
-    tr.querySelectorAll('input').forEach(inp => {
-      inp.oninput = () => { m[inp.dataset.k] = inp.value; };
-      inp.onchange = saveState;
-    });
-    tr.querySelector('[data-del]').onclick = () => { state.members.splice(i, 1); saveState(); renderMembers(); };
-    body.appendChild(tr);
-  });
-  $('memberCount').textContent = state.members.length;
-  $('memberError').textContent = '';
 }
-function setTeamCount(n) {
-  const defaults = ['Aチーム', 'Bチーム', 'Cチーム', 'Dチーム', 'Eチーム', 'Fチーム'];
-  while (state.teamNames.length < n) state.teamNames.push(defaults[state.teamNames.length]);
-  state.teamNames.length = n;
-  state.members.forEach(m => { if (m.team != null && m.team >= n) m.team = null; });
-  saveState(); renderMembers();
-}
-function addBulk() {
-  const lines = $('bulkText').value.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
-  lines.forEach(line => {
-    const parts = line.split(/[\s,、，\t]+/).filter(Boolean);
-    const part = parts.length > 1 ? parts.pop() : '';
-    state.members.push({ name: parts.join(' '), part, team: null });
-  });
-  $('bulkText').value = '';
-  $('bulkBox').style.display = 'none';
-  saveState(); renderMembers();
-}
-
-// ===== チーム分け =====
-function renderTeams() {
+function renderTeamCols() {
   const cols = $('teamCols');
   cols.innerHTML = '';
   const groups = state.teamNames.map(() => []);
@@ -680,20 +759,32 @@ function renderTeams() {
       chip.innerHTML = '<div>' + esc(m.name || '（名前なし）') + ' <span class="part">' + esc(m.part) + '</span></div><select>' + opts + '</select>';
       chip.querySelector('select').onchange = e => {
         m.team = e.target.value === '' ? null : Number(e.target.value);
-        saveState(); renderTeams();
+        saveState(); renderTeamCols();
       };
       col.appendChild(chip);
     });
     cols.appendChild(col);
   };
+  if (none.length) makeCol('まだ決まっていない人', '#7a849a', none);
   state.teamNames.forEach((nm, t) => makeCol(nm, TEAM_COLORS[t], groups[t]));
-  if (none.length) makeCol('未定', '#7a849a', none);
-  $('teamError').textContent = '';
+  // 進めるかどうかと、その理由
+  const empty = groups.filter(g => !g.length).length;
+  $('btnStartGame').disabled = none.length > 0;
+  $('teamError').textContent = none.length
+    ? 'チームが決まっていない人があと' + none.length + '人います。「ランダムに分ける」を押すか、手で選んでください'
+    : empty ? '※だれもいないチームがあります（そのまま進めることもできます）' : '';
+}
+function setTeamCount(n) {
+  const defaults = ['Aチーム', 'Bチーム', 'Cチーム', 'Dチーム', 'Eチーム', 'Fチーム'];
+  while (state.teamNames.length < n) state.teamNames.push(defaults[state.teamNames.length]);
+  state.teamNames.length = n;
+  state.members.forEach(m => { if (m.team != null && m.team >= n) m.team = null; });
+  saveState(); renderTeams();
 }
 function randomTeams() {
   const n = state.teamNames.length;
   shuffle(state.members.map((_, i) => i)).forEach((mi, k) => { state.members[mi].team = k % n; });
-  saveState(); renderTeams();
+  saveState(); renderTeamCols();
 }
 
 // ===== 出題の準備 =====
@@ -711,11 +802,11 @@ function buildQuestions() {
 }
 function startGame() {
   const err = $('teamError');
-  if (state.members.some(m => m.team == null)) { err.textContent = 'チームが「未定」の人がいます。ランダムに分けるか、手で選んでください。'; return; }
+  if (state.members.some(m => m.team == null)) return;
   const qs = buildQuestions();
   if (qs.length < RULES.perGrade * 3 + RULES.encoreCount &&
       !confirm('曲が足りないため、全' + qs.length + '問になります。このまま始めますか？')) return;
-  if (!qs.length) { err.textContent = '出題できる曲がありません。曲セットを確認してください。'; return; }
+  if (!qs.length) { err.textContent = '出題できる曲がありません。曲リストを確認してください。'; return; }
   state.questions = qs;
   state.current = 0;
   state.phase = 'ready';
@@ -888,7 +979,7 @@ function makePlayer(elId, onStateText, onErrorText) {
   P.play = song => {
     if (!P.ready) { onErrorText && onErrorText('YouTubeの準備がまだです。少し待ってください。'); return; }
     const id = parseVideoId(song && song.url);
-    if (!id) { onErrorText && onErrorText('この曲のURLが読めません（曲セットを確認）'); return; }
+    if (!id) { onErrorText && onErrorText('この曲のURLが読めません（曲リストを確認）'); return; }
     onErrorText && onErrorText('');
     P.yt.setVolume(state.volume);
     P.yt.loadVideoById({ videoId: id, startSeconds: songStart(song) });
@@ -1175,36 +1266,36 @@ function importState(file) {
   readJsonFile(file, obj => {
     if (!obj || obj.version !== 1 || !obj.screen) { alert('このアプリの保存ファイルではないようです'); return; }
     state = Object.assign(newState(), obj);
-    if (!allSets().some(s => s.id === state.setId)) alert('保存ファイルの曲セットが見つかりません。先に同じ曲セットを読み込んでください。');
+    if (!allSets().some(s => s.id === state.setId)) alert('保存ファイルの曲リストが見つかりません。先に同じ曲リストを読み込んでください。');
     resumeInto(state.screen);
   });
 }
 function importSet(file) {
   readJsonFile(file, obj => {
-    if (!obj || !Array.isArray(obj.songs)) { alert('曲セットの形になっていません（songs の一覧が必要です）'); return; }
+    if (!obj || !Array.isArray(obj.songs)) { alert('曲リストの形になっていません（songs の一覧が必要です）'); return; }
     const set = { id: 'import_' + Date.now(), name: obj.name || file.name.replace(/\.json$/, ''), songs: obj.songs };
     importedSets.push(set);
     saveImportedSets();
     state.setId = set.id;
-    saveState(); renderStart();
-    alert('「' + set.name + '」を読み込みました（' + set.songs.length + '曲）');
+    saveState();
+    if (state.screen === 'songs') renderSongs();
+    alert('「' + set.name + '」を読み込みました（' + set.songs.length + '曲）。この曲リストを選んだ状態になっています。');
   });
 }
 // 再開：ゲーム中なら、その問題の「まだ流していない」か「答えを出した」状態から
 function resumeInto(screen) { show(screen); }
 
 // ===== ボタンのつなぎこみ =====
-$('setSelect').onchange = e => { state.setId = e.target.value; checkResults = {}; saveState(); renderStart(); };
 $('importSetInput').onchange = e => { if (e.target.files[0]) importSet(e.target.files[0]); e.target.value = ''; };
-$('importStateInput').onchange = e => { if (e.target.files[0]) importState(e.target.files[0]); e.target.value = ''; };
+$('importSetInput2').onchange = e => { if (e.target.files[0]) importSet(e.target.files[0]); e.target.value = ''; closeMenu(); };
 $('importStateInput2').onchange = e => { if (e.target.files[0]) importState(e.target.files[0]); e.target.value = ''; closeMenu(); };
 
 $('btnNew').onclick = () => {
   const saved = loadSaved();
-  if (saved && saved.screen !== 'start' && !confirm('前回の続きのデータは消えます。新しく始めますか？')) return;
-  const keepSet = state.setId, keepVol = state.volume;
-  state = newState(keepSet); state.volume = keepVol;
-  show('members');
+  if (saved && !['start', 'test', 'check'].includes(saved.screen) && !confirm('前回の続きは消えます。最初からはじめますか？')) return;
+  const keepSet = state.setId, keepVol = state.volume, keepSfx = state.sfx;
+  state = newState(keepSet); state.volume = keepVol; state.sfx = keepSfx;
+  show('songs');
 };
 $('btnResume').onclick = () => {
   const saved = loadSaved();
@@ -1212,25 +1303,27 @@ $('btnResume').onclick = () => {
   state = Object.assign(newState(), saved);
   resumeInto(state.screen);
 };
-$('btnTest').onclick = () => show('test');
-$('btnCheck').onclick = () => show('check');
-$('btnTestBack').onclick = () => show('start');
-$('btnCheckBack').onclick = () => show('start');
+$('btnTestBack').onclick = () => show(prevScreen);
+$('btnCheckBack').onclick = () => show(prevScreen);
 $('btnCheckRun').onclick = startCheck;
 
-// メンバー登録
-$('teamCount').onchange = e => setTeamCount(Number(e.target.value));
+// ① 曲リスト
+$('btnSongsBack').onclick = () => show('start');
+$('btnSongsNext').onclick = () => show('members');
+
+// ② メンバー登録
 $('btnAddMember').onclick = () => { state.members.push({ name: '', part: '', team: null }); saveState(); renderMembers(); };
 $('btnBulkToggle').onclick = () => { const b = $('bulkBox'); b.style.display = b.style.display === 'none' ? 'block' : 'none'; };
 $('btnBulkAdd').onclick = addBulk;
-$('btnMembersBack').onclick = () => show('start');
+$('btnMembersBack').onclick = () => show('songs');
 $('btnToTeams').onclick = () => {
-  state.members = state.members.filter(m => (m.name || '').trim() || (m.part || '').trim());
-  if (state.members.length < 2) { $('memberError').textContent = 'メンバーを2人以上入力してください。'; renderMembers(); $('memberError').textContent = 'メンバーを2人以上入力してください。'; return; }
+  state.members = state.members.filter(m => (m.name || '').trim());
+  if (state.members.length < 2) { renderMembers(); return; }
   show('teams');
 };
 
-// チーム分け
+// ③ チーム分け
+$('teamCount').onchange = e => setTeamCount(Number(e.target.value));
 $('btnRandomTeams').onclick = randomTeams;
 $('btnTeamsBack').onclick = () => show('members');
 $('btnStartGame').onclick = startGame;
@@ -1302,11 +1395,13 @@ $('menuPanel').addEventListener('click', e => {
   if (!act) return;
   if (act === 'home') show('start');
   if (act === 'export') exportState();
+  if (act === 'test') show('test');
+  if (act === 'check') show('check');
   if (act === 'sfx') { state.sfx = !state.sfx; saveState(); renderSfxLabel(); }
   if (act === 'score') { renderScoreEdit(); openModal('scoreModal'); }
   if (act === 'jump') { renderJump(); openModal('jumpModal'); }
-  if (act === 'clear' && confirm('ブラウザに保存した進行データを消しますか？（曲セットは消えません）')) {
-    clearSaved(); setBadge('保存データを消しました'); renderStart();
+  if (act === 'clear' && confirm('ブラウザに残っている進み具合の記録を消しますか？（曲リストは消えません）')) {
+    clearSaved(); setBadge('記録を消しました'); if (state.screen === 'start') renderStart();
   }
   closeMenu();
 });
