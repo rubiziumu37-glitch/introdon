@@ -4,12 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>吹奏楽部 イントロドン</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
   /* ===== 色と文字（モダン五線譜の土台。③で本格的に作り込む） ===== */
   :root{
     --navy:#0d1830; --navy2:#16264a; --navy3:#1f3462;
     --gold:#d4af5a; --gold-soft:rgba(212,175,90,.28);
     --ink:#f4efe2; --muted:#a9b3c9; --ok:#6fd3a0; --warn:#ffd27a; --ng:#ff8a8a;
+    /* ===== テーマ：液晶スコアボード風（ここを差し替えると着せ替えできる） ===== */
+    --lcd-bg:#062b26; --lcd-line:#1d9e75; --lcd-digit:#9fe1cb; --lcd-glow:rgba(159,225,203,.45);
+    --lcd-font:"Share Tech Mono",ui-monospace,"Consolas",monospace;
+    --staff-line:rgba(212,175,90,.5);
   }
   *{box-sizing:border-box}
   html,body{margin:0;min-height:100%}
@@ -192,6 +198,28 @@
   .linkbtn{color:var(--gold);text-decoration:underline;cursor:pointer}
   .linkbtn input{display:none}
 
+  /* ===== テーマ：液晶スコアボード風の部品 ===== */
+  .lcd-badge{font-family:var(--lcd-font);font-size:24px;color:var(--lcd-digit);background:var(--lcd-bg);
+    border:1px solid var(--lcd-line);border-radius:6px;padding:2px 12px;letter-spacing:.08em;text-shadow:0 0 8px var(--lcd-glow)}
+  .score-list .team{background:var(--lcd-bg);border:1px solid var(--lcd-line);border-left:6px solid var(--tc);border-radius:8px}
+  .score-list .team .sc{font-family:var(--lcd-font);font-weight:normal;font-size:40px;color:var(--lcd-digit);
+    text-shadow:0 0 10px var(--lcd-glow);letter-spacing:.06em;min-width:70px}
+  .score-list .team .sc.up{animation:lcdUp .9s ease-out}
+  @keyframes lcdUp{0%{color:#fff;transform:scale(1.35)}100%{transform:none}}
+  .score-list .team button{border-color:var(--lcd-line)}
+  .ans-tag{font-family:var(--lcd-font);color:var(--lcd-digit);font-size:14px;letter-spacing:.3em;text-shadow:0 0 8px var(--lcd-glow)}
+  .intro-team small{font-family:var(--lcd-font);color:var(--lcd-digit);text-shadow:0 0 8px var(--lcd-glow)}
+  .rank .sc{font-family:var(--lcd-font);font-weight:normal;color:var(--lcd-digit);text-shadow:0 0 10px var(--lcd-glow);font-size:44px}
+  .rank{border:1px solid var(--lcd-line);border-left:8px solid var(--tc)}
+  /* 五線譜レース（得点に応じて音符が右へ進む） */
+  .race-wrap{margin-top:14px;padding:6px 10px;border-radius:12px;background:rgba(13,24,48,.6);border:1px solid var(--gold-soft)}
+  #race{width:100%;height:auto;display:block}
+  .hints{min-height:0}
+  .host-box{margin-top:10px;padding:10px 12px;border:1px dashed var(--gold-soft);border-radius:12px}
+  .host-box .ctl button{font-size:16px;padding:10px 12px}
+  .score-list .team{margin:6px 0;padding:6px 12px}
+  #race .note{transition:transform 1.2s cubic-bezier(.3,1.4,.5,1)}
+
   /* 紙吹雪 */
   #confetti{position:fixed;inset:0;pointer-events:none;z-index:80}
 </style>
@@ -354,7 +382,7 @@
   <section class="screen" id="screen-game">
     <div class="game-head">
       <div class="round" id="gRound">第1楽章</div>
-      <div class="qno"><span id="gNo">第1問</span><span class="pts" id="gPts">1点</span></div>
+      <div class="qno"><span class="lcd-badge" id="gNo">Q01/12</span><span class="pts" id="gPts">1点</span></div>
     </div>
     <div class="game-main">
       <div>
@@ -364,19 +392,10 @@
             <div class="panel l"></div><div class="panel r"></div><div class="valance"></div>
             <div class="label"><div class="note">♪</div><div class="q">何の曲？</div></div>
           </div>
-          <div class="answer" id="gAnswer"><div class="g" id="gAnsGrade"></div><div class="t" id="gAnsTitle"></div><div class="muted" id="gAnsWho"></div></div>
+          <div class="answer" id="gAnswer"><div class="ans-tag">ANSWER</div><div class="g" id="gAnsGrade"></div><div class="t" id="gAnsTitle"></div><div class="muted" id="gAnsWho"></div></div>
         </div>
         <div class="hints" id="gHints"></div>
-        <p class="status-ng" id="gError"></p>
-        <div class="ctl">
-          <button class="primary" id="gPlay">▶ 最初から<span class="key">R</span></button>
-          <button id="gPause">❚❚ 一時停止<span class="key">␣</span></button>
-          <button id="gResume">▶ 続きから<span class="key">␣</span></button>
-          <button id="gHint">ヒント<span class="key">H</span></button>
-        </div>
-        <div class="row">
-          <span class="muted">音量</span><input type="range" id="gVol" min="0" max="100"><span id="gVolVal" class="muted"></span>
-        </div>
+        <div class="race-wrap"><svg id="race" viewBox="0 0 1000 220"></svg></div>
       </div>
       <div>
         <div class="score-list" id="gScores"></div>
@@ -384,7 +403,18 @@
           <button id="gNone">正解なしで答えを出す<span class="key">0</span></button>
           <button class="primary" id="gNext" disabled>次の問題へ<span class="key">N</span></button>
         </div>
-        <p class="muted">正解したチームの「正解」を押すと加点して答えを出します（数字キー 1〜6 でも可）。</p>
+        <div class="host-box">
+          <div class="ctl">
+            <button class="primary" id="gPlay">▶ 最初から<span class="key">R</span></button>
+            <button id="gPause">❚❚ 止める<span class="key">␣</span></button>
+            <button id="gResume">▶ 続き<span class="key">␣</span></button>
+            <button id="gHint">ヒント<span class="key">H</span></button>
+          </div>
+          <div class="row">
+            <span class="muted">音量</span><input type="range" id="gVol" min="0" max="100"><span id="gVolVal" class="muted"></span>
+          </div>
+          <p class="status-ng" id="gError"></p>
+        </div>
       </div>
     </div>
   </section>
@@ -1023,7 +1053,7 @@ function renderGame() {
   if (!q) { show('result'); return; }
   const song = curSong() || {};
   $('gRound').textContent = ROUND_LABELS[q.round];
-  $('gNo').textContent = '第' + (state.current + 1) + '問 ／ 全' + state.questions.length + '問';
+  $('gNo').textContent = 'Q' + pad(state.current + 1) + '/' + pad(state.questions.length);
   $('gPts').textContent = q.points + '点';
   $('gError').textContent = '';
 
@@ -1052,12 +1082,49 @@ function renderGame() {
   state.teamNames.forEach((nm, t) => {
     const row = document.createElement('div');
     row.className = 'team'; row.style.setProperty('--tc', TEAM_COLORS[t]);
-    row.innerHTML = '<div class="nm">' + esc(nm) + '</div><div class="sc">' + (state.scores[t] || 0) + '</div>' +
+    row.innerHTML = '<div class="nm">' + esc(nm) + '</div><div class="sc' + (lastUp === t ? ' up' : '') + '">' + pad(state.scores[t] || 0) + '</div>' +
       '<button' + (answered ? ' disabled' : '') + '>正解<span class="key">' + (t + 1) + '</span></button>';
     row.querySelector('button').onclick = () => award(t);
     list.appendChild(row);
   });
+  lastUp = null;
+  renderRace();
   $('gVol').value = state.volume; $('gVolVal').textContent = state.volume;
+}
+let lastUp = null;   // 直前に点が入ったチーム（数字を光らせる）
+
+// ===== 五線譜レース =====
+// 5本線の上に、チームごとの音符（棒つき）を置き、得点÷満点の割合だけ右へ進める
+function renderRace() {
+  const svg = $('race');
+  const n = state.teamNames.length;
+  const X0 = 190, X1 = 920;                       // スタート位置とゴール位置
+  const lineY = [60, 95, 130, 165, 200];           // 五線のたて位置
+  const noteY = t => 77 + t * (105 / Math.max(1, n - 1));
+  const max = state.questions.reduce((a, q) => a + q.points, 0) || 1;
+  if (svg.dataset.n !== String(n) || svg.dataset.names !== state.teamNames.join('|')) {
+    let h = '';
+    lineY.forEach(y => { h += '<line x1="20" y1="' + y + '" x2="' + (X1 + 40) + '" y2="' + y + '" stroke="var(--staff-line)" stroke-width="1.2" vector-effect="non-scaling-stroke"/>'; });
+    // ゴールの複縦線
+    h += '<line x1="' + (X1 + 30) + '" y1="60" x2="' + (X1 + 30) + '" y2="200" stroke="var(--gold)" stroke-width="2" vector-effect="non-scaling-stroke"/>';
+    h += '<line x1="' + (X1 + 38) + '" y1="60" x2="' + (X1 + 38) + '" y2="200" stroke="var(--gold)" stroke-width="5" vector-effect="non-scaling-stroke"/>';
+    h += '<text x="' + (X1 + 34) + '" y="40" text-anchor="middle" fill="var(--gold)" font-size="26" font-family="var(--lcd-font)">FINE</text>';
+    h += '<text x="22" y="40" fill="var(--muted)" font-size="26" font-family="var(--lcd-font)">START</text>';
+    state.teamNames.forEach((nm, t) => {
+      const y = noteY(t), c = TEAM_COLORS[t];
+      h += '<g class="note" data-t="' + t + '" style="transform:translateX(' + X0 + 'px)">' +
+        '<ellipse cx="0" cy="' + y + '" rx="19" ry="13" transform="rotate(-20 0 ' + y + ')" fill="' + c + '"/>' +
+        '<line x1="17" y1="' + (y - 4) + '" x2="17" y2="' + (y - 62) + '" stroke="' + c + '" stroke-width="4" vector-effect="non-scaling-stroke"/>' +
+        '<text x="-28" y="' + (y + 10) + '" text-anchor="end" fill="' + c + '" font-size="30" font-weight="bold">' + esc(nm) + '</text></g>';
+    });
+    svg.innerHTML = h;
+    svg.dataset.n = String(n); svg.dataset.names = state.teamNames.join('|');
+  }
+  svg.querySelectorAll('.note').forEach(g => {
+    const t = Number(g.dataset.t);
+    const x = X0 + (X1 - X0) * Math.min(1, (state.scores[t] || 0) / max);
+    g.style.transform = 'translateX(' + x + 'px)';
+  });
 }
 function award(t) {
   if (state.phase === 'answer') return;
@@ -1065,6 +1132,7 @@ function award(t) {
   state.scores[t] = (state.scores[t] || 0) + q.points;
   state.awarded[state.current] = t;
   state.log.push({ q: state.current, team: t, points: q.points });
+  lastUp = t;
   sfx('correct');
   confetti(TEAM_COLORS[t]);
   reveal();
