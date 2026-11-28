@@ -224,6 +224,38 @@
   .intro-team small{font-family:var(--lcd-font);color:var(--lcd-digit);text-shadow:0 0 8px var(--lcd-glow)}
   .rank .sc{font-family:var(--lcd-font);font-weight:normal;color:var(--lcd-digit);text-shadow:0 0 10px var(--lcd-glow);font-size:44px}
   .rank{border:1px solid var(--lcd-line);border-left:8px solid var(--tc)}
+  /* 再生の状態表示（準備中・再生中・一時停止） */
+  .pstate{margin-top:14px;font-family:var(--lcd-font);font-size:22px;letter-spacing:.15em;padding:4px 18px;border-radius:999px;
+    color:var(--muted);border:1px solid rgba(169,179,201,.5);background:rgba(8,14,30,.6)}
+  .curtain.loading .pstate{color:var(--warn);border-color:var(--warn);animation:blink 1s steps(2) infinite}
+  .curtain.playing .pstate{color:var(--lcd-digit);border-color:var(--lcd-line);text-shadow:0 0 10px var(--lcd-glow);background:var(--lcd-bg)}
+  .curtain.paused .pstate{color:var(--ink);border-color:var(--ink)}
+  @keyframes blink{50%{opacity:.35}}
+  .eq{display:flex;gap:6px;align-items:flex-end;height:40px;margin-top:10px;opacity:.25}
+  .eq i{display:block;width:8px;height:8px;border-radius:3px;background:var(--lcd-digit)}
+  .curtain.playing .eq{opacity:1}
+  .curtain.playing .eq i{animation:eq .8s ease-in-out infinite alternate}
+  .curtain.playing .eq i:nth-child(2){animation-delay:-.2s;animation-duration:.6s}
+  .curtain.playing .eq i:nth-child(3){animation-delay:-.5s;animation-duration:.9s}
+  .curtain.playing .eq i:nth-child(4){animation-delay:-.1s;animation-duration:.7s}
+  .curtain.playing .eq i:nth-child(5){animation-delay:-.4s;animation-duration:.85s}
+  .curtain.playing .eq i:nth-child(6){animation-delay:-.3s;animation-duration:.65s}
+  .curtain.playing .eq i:nth-child(7){animation-delay:-.6s;animation-duration:.75s}
+  @keyframes eq{from{height:6px}to{height:40px}}
+  .curtain.playing .label .note{animation:none}
+
+  /* 回答（正解）ボタン：チーム色で大きく */
+  .score-list .team{min-height:84px}
+  .score-list .team button.ans{background:var(--tc);color:#0d1830;border:none;font-weight:bold;font-size:22px;
+    padding:14px 22px;border-radius:12px;box-shadow:0 4px 0 rgba(0,0,0,.35),0 0 18px color-mix(in srgb,var(--tc) 45%,transparent);
+    transition:transform .08s,filter .15s;letter-spacing:.05em}
+  .score-list .team button.ans:hover{filter:brightness(1.12);transform:translateY(-1px)}
+  .score-list .team button.ans:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.35)}
+  .score-list .team button.ans .key{color:#0d1830;border-color:rgba(13,24,48,.5)}
+  .score-list .team button.ans:disabled{background:transparent;color:var(--muted);box-shadow:none;border:1px solid rgba(169,179,201,.3);font-size:16px}
+  .score-list .team.win{box-shadow:0 0 0 3px var(--tc),0 0 26px color-mix(in srgb,var(--tc) 50%,transparent)}
+  #gNone{font-size:17px}
+
   /* 五線譜レース（得点に応じて音符が右へ進む） */
   .race-wrap{margin-top:14px;padding:6px 10px;border-radius:12px;background:rgba(13,24,48,.6);border:1px solid var(--gold-soft)}
   #race{width:100%;height:auto;display:block}
@@ -403,7 +435,9 @@
           <div class="yt" id="yt-game"></div>
           <div class="curtain" id="gCurtain">
             <div class="panel l"></div><div class="panel r"></div><div class="valance"></div>
-            <div class="label"><div class="note">♪</div><div class="q">何の曲？</div></div>
+            <div class="label"><div class="note">♪</div><div class="q">何の曲？</div>
+              <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+              <div class="pstate" id="gPState">準備中</div></div>
           </div>
           <div class="answer" id="gAnswer"><div class="ans-tag">ANSWER</div><div class="g" id="gAnsGrade"></div><div class="t" id="gAnsTitle"></div><div class="muted" id="gAnsWho"></div></div>
         </div>
@@ -1055,7 +1089,19 @@ function makePlayer(elId, onStateText, onErrorText) {
 }
 const STATE_TEXT = { '-1': '準備中', 0: '終わりました', 1: '再生中', 2: '一時停止', 3: '読み込み中', 5: '待機中' };
 const testP = makePlayer('yt-test', s => { $('playState').textContent = STATE_TEXT[s] || '-'; }, t => { $('tError').textContent = t; });
-const gameP = makePlayer('yt-game', s => { $('gCurtain').classList.toggle('playing', s === 1); }, t => { $('gError').textContent = t; });
+const gameP = makePlayer('yt-game', s => setPlayState(s), t => { $('gError').textContent = t; });
+// 再生の状態を、カーテンの上の表示に反映する
+// s: -1=未開始 0=終了 1=再生中 2=一時停止 3=読み込み中 5=頭出し済み
+let started = false;   // この問題で一度でも「最初から」を押したか
+function setPlayState(s) {
+  const c = $('gCurtain'), el = $('gPState');
+  c.classList.remove('playing', 'paused', 'loading');
+  if (s === 1) { c.classList.add('playing'); el.textContent = '♪ 再生中'; }
+  else if (s === 2) { c.classList.add('paused'); el.textContent = '一時停止'; }
+  else if (s === 0) { el.textContent = '終わりました'; }
+  else if (started) { c.classList.add('loading'); el.textContent = '準備中…'; }
+  else { el.textContent = '準備中'; }
+}
 
 window.onYouTubeIframeAPIReady = function () {
   ytApiReady = true;
@@ -1119,7 +1165,8 @@ function renderGame() {
     const row = document.createElement('div');
     row.className = 'team'; row.style.setProperty('--tc', TEAM_COLORS[t]);
     row.innerHTML = '<div class="nm">' + esc(nm) + '</div><div class="sc' + (lastUp === t ? ' up' : '') + '">' + pad(state.scores[t] || 0) + '</div>' +
-      '<button' + (answered ? ' disabled' : '') + '>正解<span class="key">' + (t + 1) + '</span></button>';
+      '<button class="ans"' + (answered ? ' disabled' : '') + '>' + (answered ? '正解' : '正解！') + '<span class="key">' + (t + 1) + '</span></button>';
+    if (answered && state.awarded[state.current] === t) row.classList.add('win');
     row.querySelector('button').onclick = () => award(t);
     list.appendChild(row);
   });
@@ -1194,6 +1241,7 @@ function nextQuestion() {
 }
 function goQuestion(i) {
   gameP.stop();
+  started = false; setPlayState(-1);
   state.current = i;
   state.phase = 'ready';
   state.hintsShown = 0;
@@ -1433,7 +1481,7 @@ $('btnTeamsBack').onclick = () => show('members');
 $('btnStartGame').onclick = startGame;
 
 // ゲーム
-$('gPlay').onclick = () => gameP.play(curSong());
+$('gPlay').onclick = () => { started = true; setPlayState(3); gameP.play(curSong()); };
 $('gPause').onclick = () => gameP.pause();
 $('gResume').onclick = () => gameP.resume();
 $('gHint').onclick = showHint;
@@ -1482,8 +1530,8 @@ document.addEventListener('keydown', e => {
     if (e.key === 'ArrowLeft') introPrev();
   }
   if (state.screen === 'game') {
-    if (e.code === 'Space') { e.preventDefault(); togglePlayer(gameP, curSong()); }
-    else if (e.key === 'r' || e.key === 'R') gameP.play(curSong());
+    if (e.code === 'Space') { e.preventDefault(); if (gameP.state() !== 1 && gameP.state() !== 2) { started = true; setPlayState(3); } togglePlayer(gameP, curSong()); }
+    else if (e.key === 'r' || e.key === 'R') { started = true; setPlayState(3); gameP.play(curSong()); }
     else if (e.key === 'h' || e.key === 'H') showHint();
     else if (e.key === 'n' || e.key === 'N' || e.key === 'ArrowRight') nextQuestion();
     else if (e.key === '0') revealNone();
