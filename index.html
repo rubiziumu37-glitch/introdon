@@ -511,6 +511,21 @@
 const SAMPLE_URL = 'https://www.youtube.com/watch?v=M7lc1UVf-VE'; // YouTube公式の見本動画
 const SONG_SETS = [
   {
+    id: 'band',
+    name: '吹奏楽部の思い出（本番用）',
+    songs: [
+      { grade: 1, title: 'ディープ・パープル・メドレー', url: '', hint1: '編曲：佐橋俊彦', hint2: '' },
+      { grade: 1, title: 'マイ・ウェイ', url: '', hint1: '', hint2: '' },
+      { grade: 1, title: '吹奏楽のための小狂詩曲', url: '', hint1: '作曲：大栗裕', hint2: '' },
+      { grade: 2, title: 'アンデルセン物語', url: '', hint1: '', hint2: '' },
+      { grade: 2, title: 'そりすべり', url: '', hint1: '作曲：ルロイ・アンダーソン', hint2: '' },
+      { grade: 2, title: '飛天', url: '', hint1: '', hint2: '' },
+      { grade: 3, title: 'スクーティン・オン・ハードロック', url: '', hint1: '作曲：デイヴィッド・ホルシンガー', hint2: '' },
+      { grade: 3, title: '復興', url: '', hint1: '作曲：保科洋', hint2: '' },
+      { grade: 3, title: '道', url: '', hint1: '', hint2: '' }
+    ]
+  },
+  {
     id: 'sample',
     name: 'サンプル（動作確認用）',
     songs: [
@@ -701,6 +716,8 @@ function setStatus(set) {
   const need = RULES.perGrade * 3 + RULES.encoreCount;
   const lack = [1, 2, 3].filter(g => count(g) < RULES.perGrade);
   if (!set.songs.length) return { counts, warn: '曲が1曲も入っていません', block: true };
+  const noUrl = set.songs.filter(s => !parseVideoId(s.url)).length;
+  if (noUrl) return { counts, warn: 'YouTubeのURLが入っていない曲が' + noUrl + '曲あります（その曲は流せません）' };
   if (lack.length) return { counts, warn: lack.join('・') + '年の曲が' + RULES.perGrade + '曲より少ないので、問題数が減ります' };
   if (set.songs.length < need) return { counts, warn: 'アンコール用の曲が足りないので、問題数が減ります（全' + need + '曲あると' + need + '問になります）' };
   return { counts, warn: '' };
