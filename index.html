@@ -170,13 +170,26 @@
   /* ===== わかりやすさのための部品 ===== */
   .menu-sec{font-size:12px;color:var(--gold);letter-spacing:.15em;margin-top:6px;border-top:1px solid var(--gold-soft);padding-top:6px}
   .menu-sec:first-child{border-top:none;margin-top:0;padding-top:0}
-  .hero{text-align:center;padding:40px 0 20px}
-  .hero h1{font-size:64px}
-  .lead{font-size:22px;color:var(--muted);margin:8px 0 34px}
+  /* ===== スタート画面（背景の絵：bg-start.webp） ===== */
+  body.on-start{background:#0d1830 url('bg-start.webp') center bottom / cover no-repeat fixed}
+  body.on-start::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:radial-gradient(ellipse 55% 45% at 50% 52%,rgba(8,14,30,.55),rgba(8,14,30,0) 70%)}
+  body.on-start .staff{visibility:hidden}
+  body.on-start .wrap{position:relative;z-index:1}
+  .hero{text-align:center;min-height:calc(100vh - 120px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6vh 0 10vh}
+  .hero h1{font-size:clamp(48px,8vw,96px);letter-spacing:.12em;margin:0;color:#fff7e0;
+    text-shadow:0 0 18px rgba(212,175,90,.55),0 4px 18px rgba(0,0,0,.7)}
+  .hero h1 small{font-family:var(--lcd-font);color:var(--lcd-digit);font-size:clamp(14px,1.6vw,20px);letter-spacing:.45em;
+    text-shadow:0 0 10px var(--lcd-glow);margin-bottom:10px}
+  .lead{font-size:clamp(17px,1.8vw,24px);color:#e9dfc4;margin:14px 0 36px;letter-spacing:.1em;text-shadow:0 2px 10px rgba(0,0,0,.8)}
+  .hero .muted{color:#c9cfdd;text-shadow:0 1px 6px rgba(0,0,0,.9)}
+  .hero button.big{animation:breathe 2.6s ease-in-out infinite}
+  .hero.has-resume #btnNew{animation:none}
+  @keyframes breathe{0%,100%{box-shadow:0 6px 24px rgba(212,175,90,.25)}50%{box-shadow:0 6px 34px rgba(212,175,90,.6)}}
   button.big{font-size:28px;padding:20px 56px;border-radius:16px;box-shadow:0 6px 24px rgba(212,175,90,.25)}
-  .resume-card{max-width:560px;margin:0 auto 26px;padding:20px;border:2px solid var(--gold);border-radius:16px;background:rgba(22,38,74,.85)}
+  .resume-card{max-width:560px;width:100%;margin:0 auto 26px;padding:20px;border:2px solid var(--gold);border-radius:16px;background:rgba(13,24,48,.82);backdrop-filter:blur(4px)}
   .resume-what{font-size:22px;margin:6px 0 16px}
-  .resume-card + button.big{font-size:18px;padding:12px 28px;background:var(--navy2);color:var(--ink);box-shadow:none;font-weight:normal}
+  .hero.has-resume #btnNew{font-size:18px;padding:12px 28px;background:var(--navy2);color:var(--ink);box-shadow:none;font-weight:normal}
   .stepper{display:none;justify-content:center;gap:4px;flex-wrap:wrap;padding:0 16px;margin:-4px 0 4px}
   .stepper.show{display:flex}
   .stepper .st{display:flex;align-items:center;gap:6px;font-size:15px;color:var(--muted);padding:6px 10px}
@@ -643,6 +656,7 @@ function show(name) {
   if (name === 'check') renderCheckTable();
   document.querySelectorAll('.game-only').forEach(b => b.style.display = name === 'game' ? '' : 'none');
   renderStepper(name);
+  document.body.classList.toggle('on-start', name === 'start');
   saveState();
   window.scrollTo(0, 0);
 }
@@ -662,6 +676,7 @@ function renderStart() {
   const saved = loadSaved();
   const can = saved && saved.screen && !['start', 'test', 'check'].includes(saved.screen);
   $('resumeCard').style.display = can ? 'block' : 'none';
+  document.querySelector('.hero').classList.toggle('has-resume', !!can);
   if (can) $('resumeWhat').textContent = resumeSummary(saved);
   $('btnNew').textContent = can ? '最初からはじめる' : 'ゲームをはじめる';
   $('newNote').textContent = can ? '最初からはじめると、前回の続きは消えます' : '';
@@ -1031,7 +1046,11 @@ window.onYouTubeIframeAPIReady = function () {
   testP.create();
   gameP.create();
 };
-function setYtStatus(text, cls) { const el = $('ytStatus'); el.textContent = text; el.className = cls; }
+function setYtStatus(text, cls) {
+  const el = $('ytStatus'); el.textContent = text; el.className = cls;
+  // つながったら表示を消す（問題があるときだけ出す）
+  $('ytLine').style.display = cls === 'status-ok' ? 'none' : '';
+}
 (function loadYtApi() {
   const tag = document.createElement('script');
   tag.src = 'https://www.youtube.com/iframe_api';
@@ -1482,6 +1501,7 @@ loadImportedSets();
   if (!allSets().some(s => s.id === state.setId)) state.setId = SONG_SETS[0].id;
   if (saved && typeof saved.sfx === 'boolean') state.sfx = saved.sfx;
   $('screen-start').classList.add('active');
+  document.body.classList.add('on-start');
   document.querySelectorAll('.game-only').forEach(b => b.style.display = 'none');
   renderSfxLabel();
   renderStart();
